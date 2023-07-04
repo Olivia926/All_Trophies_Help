@@ -59,10 +59,7 @@ def get_two_click_coordinates():
 
     :return: The positions of the user's mouse clicks
     """
-    from All_Trophies_App.ApplicationButtonFunctions import first_click
-
     clicks = 0
-    # first_click()
     print(f'Make a first click in the top left')
     while clicks < 2:
         with Listener(on_click=on_click) as listener:
