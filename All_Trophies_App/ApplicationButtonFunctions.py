@@ -1,9 +1,8 @@
-import tkinter
-
 import globals
 import AppGlobals
 import tkinter as tk
 from tkinter import END
+from tkVideoPlayer import TkinterVideo
 
 window = AppGlobals.window
 cur = AppGlobals.cur
@@ -44,13 +43,152 @@ trophies_frame = tk.Frame(window)
 bonus_org_frame = tk.Frame(window)
 
 
-def first_click():
-    text = tk.Text(window)
-    text.pack(padx=20, pady=20)
-    text.insert(END, f"Please click on the top left part of the bonuses\n")
-    text.insert(END, f"(See reference image below for area to be selected)\n")
-    image = tk.PhotoImage(file="../Images/First_Click.png")
-    text.window_create(END, window=tk.Label(text, image=image))
+def help_1():
+    file = "../Images/First_Click.png"
+    new_window = tk.Toplevel(window, width=200, height=750)
+    frame = tk.Frame(new_window, width=200, height=750)
+    frame.pack()
+    new_window.geometry(f"+{window.winfo_x()+100}+{window.winfo_y()+100}")
+    text = tk.Text(frame, font={'Times New Roman', 20, 'bold'})
+    text.pack()
+    text.insert(END, f"Click on the top left of the bonuses section to start\n")
+    text.insert(END, f"(See reference image below)\n")
+    photo = tk.PhotoImage(file=file)
+    text.image_create(END, image=photo)
+    text.image = photo
+
+    def exit_btn():
+        new_window.destroy()
+        help_2()
+
+    tk.Button(frame, text="Next", command=exit_btn).pack(side='right')
+
+
+def help_2():
+    file = "../Images/Second_Click.png"
+    new_window = tk.Toplevel(window, width=200, height=750)
+    frame = tk.Frame(new_window, width=200, height=750)
+    frame.pack()
+    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+    text = tk.Text(frame, font={'Times New Roman', 20, 'bold'})
+    text.pack()
+    text.insert(END, f"Click on the bottom right of the bonuses section\n")
+    photo = tk.PhotoImage(file=file)
+    text.image_create(END, image=photo)
+    text.image = photo
+
+    def exit_btn():
+        new_window.destroy()
+        help_3()
+
+    tk.Button(frame, text="Next", command=exit_btn).pack(side='right')
+
+
+def help_3():
+    new_window = tk.Toplevel(window, width=200, height=750)
+    frame = tk.Frame(new_window)
+    frame.pack()
+    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+    label = tk.Label(frame, font={'Times New Roman', 20, 'bold'},
+                     text=f"Scroll the screen down quickly using the control stick\n")
+    label.pack()
+    video = TkinterVideo(frame)
+    video.load(r"../Images/Scroll_Help.mp4")
+    video.pack(expand=True)
+    video.play()
+
+    def load(event):
+        video.config(width=193, height=336)
+
+    def loop(event):
+        video.play()
+
+    def exit_btn():
+        new_window.destroy()
+        help_4()
+
+    video.bind("<<Loaded>>", load)
+    video.bind('<<Ended>>', loop)
+
+    tk.Button(frame, text="Next", command=exit_btn).pack(side='right')
+
+
+def help_4():
+    new_window = tk.Toplevel(window, width=200, height=750)
+    frame = tk.Frame(new_window)
+    frame.pack()
+    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+    label = tk.Label(frame, font={'Times New Roman', 20, 'bold'},
+                     text=f"When it reaches the bottom, wait for a little bit!\n")
+    label.pack()
+    video = TkinterVideo(frame)
+    video.load(r"../Images/End_Scroll.mp4")
+    video.pack(expand=True)
+    video.play()
+
+    def load(event):
+        video.config(width=193, height=336)
+
+    def loop(event):
+        video.play()
+
+    def exit_btn():
+        new_window.destroy()
+        help_5()
+
+    video.bind("<<Loaded>>", load)
+    video.bind('<<Ended>>', loop)
+
+    tk.Button(frame, text="Next", command=exit_btn).pack(side='right')
+
+
+def help_5():
+    new_window = tk.Toplevel(window, width=200, height=750)
+    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+    tk.Label(new_window, font={'Times New Roman', 20, 'bold'},
+             text=f"Press 'q' to stop the program from recording!").pack()
+
+    def exit_btn():
+        new_window.destroy()
+        help_6()
+
+    tk.Button(new_window, text="Next", command=exit_btn).pack(side='right')
+
+
+def help_6():
+    new_window = tk.Toplevel(window, width=200, height=750)
+    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+    tk.Label(new_window, font={'Times New Roman', 20, 'bold'},
+             text=f"Something will happen on screen prompting you to wait").pack()
+
+    tk.Label(new_window, font={'Times New Roman', 20, 'bold'},
+             text=f"(Placeholder for thing)").pack()
+
+    def exit_btn():
+        new_window.destroy()
+        help_7()
+
+    tk.Button(new_window, text="Next", command=exit_btn).pack(side='right')
+
+
+def help_7():
+    file = "../Images/Final_Helper.PNG"
+    new_window = tk.Toplevel(window, width=200, height=750)
+    frame = tk.Frame(new_window, width=200, height=750)
+    frame.pack()
+    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+    text = tk.Text(frame, font={'Times New Roman', 20, 'bold'})
+    text.pack()
+    text.insert(END, f"The bonuses will add based on what you have!\n")
+    photo = tk.PhotoImage(file=file)
+    photo = photo.subsample(2, 2)
+    text.image_create(END, image=photo)
+    text.image = photo
+
+    def exit_btn():
+        new_window.destroy()
+
+    tk.Button(frame, text="Next", command=exit_btn).pack(side='right')
 
 
 def clear_listboxes():
@@ -62,7 +200,7 @@ def clear_listboxes():
 
 def auto_complete():
     from All_Trophies_Image_Recognition.MyBonusChecker import main
-
+    # do something to tell the user it has started
     main()
     clear_listboxes()
     open_bonuses()
@@ -118,6 +256,7 @@ def open_bonuses():
 
     middle.grid(row=1, column=2)
     tk.Button(bonuses_frame, text="Use Auto Checker", command=auto_complete).grid(row=1, column=0)
+    tk.Button(bonuses_frame, text="Help", command=help_1).grid(row=0, column=0)
 
     bonuses_frame.pack()
 
