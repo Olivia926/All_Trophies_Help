@@ -3,6 +3,7 @@ import AppGlobals
 import tkinter as tk
 from tkinter import END
 from tkVideoPlayer import TkinterVideo
+import threading
 
 window = AppGlobals.window
 cur = AppGlobals.cur
@@ -38,9 +39,21 @@ uncollected = tk.Listbox(bonuses_frame,
                          height=20,
                          selectmode=tk.SINGLE)
 
-
 trophies_frame = tk.Frame(window)
 bonus_org_frame = tk.Frame(window)
+
+booleans = [0, 0, 0]
+
+
+def auto_complete():
+    # do something to tell the user it has started
+    run_bonus_checker()
+    clear_listboxes()
+    open_bonuses()
+
+
+auto_checker_frame = tk.Frame(bonuses_frame)
+check_bonuses_btn = tk.Button(auto_checker_frame, text="Use Auto Checker", command=auto_complete)
 
 
 def help_1():
@@ -198,12 +211,29 @@ def clear_listboxes():
     uncollected.delete(0, END)
 
 
-def auto_complete():
+def run_bonus_checker_worker():
     from All_Trophies_Image_Recognition.MyBonusChecker import main
-    # do something to tell the user it has started
     main()
-    clear_listboxes()
-    open_bonuses()
+
+
+def run_bonus_checker():
+    label = tk.Label(auto_checker_frame, text="Checking Bonuses...")
+    label.pack(side='top')
+    check_bonuses_btn.config(state='disabled')
+    t = threading.Thread(target=run_bonus_checker_worker)
+    t.start()
+
+    def check_if_done():
+        if not t.is_alive():
+            label.pack_forget()
+            check_bonuses_btn.config(state='normal')
+        else:
+            schedule_check()
+
+    def schedule_check():
+        bonuses_frame.after(1000, check_if_done)
+
+    schedule_check()
 
 
 def consistent_order():
@@ -221,22 +251,36 @@ def hide_cur():
 
 def open_bonuses():
     global cur
-    bonuses_frame.grid_columnconfigure(1, weight=1, uniform="bonuses")
-    bonuses_frame.grid_columnconfigure(2, weight=1, uniform="bonuses")
-    bonuses_frame.grid_columnconfigure(3, weight=1, uniform="bonuses")
+    if not booleans[0]:
+        bonuses_frame.grid_columnconfigure(1, weight=1, uniform="bonuses")
+        bonuses_frame.grid_columnconfigure(2, weight=1, uniform="bonuses")
+        bonuses_frame.grid_columnconfigure(3, weight=1, uniform="bonuses")
 
-    if cur != 0:
-        hide_cur()
-        cur = 0
+        tk.Label(bonuses_frame,
+                 text="Collected Bonuses",
+                 font=("Franklin_Gothic_Medium", 20, "bold"),
+                 fg="#000000").grid(row=0, column=1)
+        tk.Label(bonuses_frame,
+                 text="Remaining Bonuses",
+                 font=("Franklin_Gothic_Medium", 20, "bold"),
+                 fg="#000000").grid(row=0, column=3)
 
-    tk.Label(bonuses_frame,
-             text="Collected Bonuses",
-             font=("Franklin_Gothic_Medium", 20, "bold"),
-             fg="#000000").grid(row=0, column=1)
-    tk.Label(bonuses_frame,
-             text="Remaining Bonuses",
-             font=("Franklin_Gothic_Medium", 20, "bold"),
-             fg="#000000").grid(row=0, column=3)
+        collected.grid(row=1, column=1)
+        uncollected.grid(row=1, column=3)
+
+        collected.bind("<<ListboxSelect>>", move_bonus_collected)
+        uncollected.bind("<<ListboxSelect>>", move_bonus_uncollected)
+
+        move_un.pack(side="top")
+        tk.Button(middle, text="MOVE", command=move_all_bonuses).pack(side="top")
+        move_col.pack(side="top")
+
+        middle.grid(row=1, column=2)
+        auto_checker_frame.grid(row=1, column=0)
+        check_bonuses_btn.pack(sid='bottom')
+        tk.Button(bonuses_frame, text="Help", command=help_1).grid(row=0, column=0)
+
+        booleans[0] = 1
 
     for bonus, state in globals.bonuses:
         if state == 0:
@@ -244,19 +288,8 @@ def open_bonuses():
         else:
             collected.insert(collected.size(), bonus)
 
-    collected.grid(row=1, column=1)
-    uncollected.grid(row=1, column=3)
-
-    collected.bind("<<ListboxSelect>>", move_bonus_collected)
-    uncollected.bind("<<ListboxSelect>>", move_bonus_uncollected)
-
-    move_un.pack(side="top")
-    tk.Button(middle, text="MOVE", command=move_all_bonuses).pack(side="top")
-    move_col.pack(side="top")
-
-    middle.grid(row=1, column=2)
-    tk.Button(bonuses_frame, text="Use Auto Checker", command=auto_complete).grid(row=1, column=0)
-    tk.Button(bonuses_frame, text="Help", command=help_1).grid(row=0, column=0)
+    hide_cur()
+    cur = 0
 
     bonuses_frame.pack()
 
