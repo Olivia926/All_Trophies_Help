@@ -47,13 +47,37 @@ booleans = [0, 0, 0]
 
 def auto_complete():
     # do something to tell the user it has started
-    run_bonus_checker()
     clear_listboxes()
+    disable_children(bonuses_frame)
+    disable_children(window)
+    run_bonus_checker()
+
+
+def auto_complete_2():
+    enable_children(bonuses_frame)
+    enable_children(window)
+    fill_listboxes()
     open_bonuses()
 
 
 auto_checker_frame = tk.Frame(bonuses_frame)
 check_bonuses_btn = tk.Button(auto_checker_frame, text="Use Auto Checker", command=auto_complete)
+
+
+def disable_children(widget):
+    for child in widget.winfo_children():
+        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox):
+            child.configure(state='disabled')
+        if isinstance(child, tk.Frame):
+            disable_children(child)
+
+
+def enable_children(widget):
+    for child in widget.winfo_children():
+        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox):
+            child.configure(state='normal')
+        if isinstance(child, tk.Frame):
+            enable_children(child)
 
 
 def help_1():
@@ -227,6 +251,7 @@ def run_bonus_checker():
         if not t.is_alive():
             label.pack_forget()
             check_bonuses_btn.config(state='normal')
+            auto_complete_2()
         else:
             schedule_check()
 
@@ -236,8 +261,8 @@ def run_bonus_checker():
     schedule_check()
 
 
-def consistent_order():
-    print()
+def consistent_order(list):
+    print(list)
 
 
 def hide_cur():
@@ -247,6 +272,14 @@ def hide_cur():
         trophies_frame.pack_forget()
     else:
         bonus_org_frame.pack_forget()
+
+
+def fill_listboxes():
+    for bonus, state in globals.bonuses:
+        if state == 0:
+            uncollected.insert(uncollected.size(), bonus)
+        else:
+            collected.insert(collected.size(), bonus)
 
 
 def open_bonuses():
@@ -268,6 +301,8 @@ def open_bonuses():
         collected.grid(row=1, column=1)
         uncollected.grid(row=1, column=3)
 
+        fill_listboxes()
+
         collected.bind("<<ListboxSelect>>", move_bonus_collected)
         uncollected.bind("<<ListboxSelect>>", move_bonus_uncollected)
 
@@ -281,12 +316,6 @@ def open_bonuses():
         tk.Button(bonuses_frame, text="Help", command=help_1).grid(row=0, column=0)
 
         booleans[0] = 1
-
-    for bonus, state in globals.bonuses:
-        if state == 0:
-            uncollected.insert(uncollected.size(), bonus)
-        else:
-            collected.insert(collected.size(), bonus)
 
     hide_cur()
     cur = 0

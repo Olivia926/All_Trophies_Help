@@ -230,6 +230,8 @@ def make_recording(top_left, bottom_right):
 
 
 def main():
+    globals.click_positions.clear()
+
     coordinates = get_two_click_coordinates()
 
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
