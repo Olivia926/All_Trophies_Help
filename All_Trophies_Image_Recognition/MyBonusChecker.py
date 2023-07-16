@@ -198,6 +198,7 @@ def check_bonuses():
         temp = pytesseract.image_to_string(frame)
         text = temp.split('\n')
         func = partial(start_thread, globals.global_index)
+        
         with concurrent.futures.ThreadPoolExecutor(max_workers=len(text)) as executor:
             executor.map(func, text)
 
@@ -205,8 +206,6 @@ def check_bonuses():
             break
 
     print(f"Finished looking at bonuses in {math.ceil(time.time() - start)} seconds")
-    time.sleep(2)
-    print(f'{globals.global_index + 1}/{len(globals.bonuses)} bonuses found\n')
 
 
 def make_recording(top_left, bottom_right):
