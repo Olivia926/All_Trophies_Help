@@ -261,10 +261,6 @@ def run_bonus_checker():
     schedule_check()
 
 
-def consistent_order(list):
-    print(list)
-
-
 def hide_cur():
     if cur == 0:
         bonuses_frame.pack_forget()
@@ -305,6 +301,8 @@ def open_bonuses():
 
         collected.bind("<<ListboxSelect>>", move_bonus_collected)
         uncollected.bind("<<ListboxSelect>>", move_bonus_uncollected)
+        move_un.bind("<<ListboxSelect>>", move_bonus_uncollected_back)
+        move_col.bind("<<ListboxSelect>>", move_bonus_collected_back)
 
         move_un.pack(side="top")
         tk.Button(middle, text="MOVE", command=move_all_bonuses).pack(side="top")
@@ -323,14 +321,45 @@ def open_bonuses():
     bonuses_frame.pack()
 
 
+def get_index(listbox, entry):
+    bonuses = globals.bonuses
+    index = 0
+
+    for i in range(len(bonuses)):
+        if entry == bonuses[i][0]:
+            index = i
+            break
+
+    for i in range(listbox.size()):
+        for j in range(len(bonuses)):
+            if listbox.get(i) == bonuses[j][0]:
+                if j > index:
+                    return i, index
+
+    return END, index
+
+
 def move_all_bonuses():
     while move_col.size() > 0:
-        uncollected.insert(uncollected.size(), move_col.get(0))
+        index, bonuses_index = get_index(uncollected, move_col.get(0))
+        uncollected.insert(index, move_col.get(0))
+        globals.bonuses[bonuses_index][1] = 0
         move_col.delete(0)
 
     while move_un.size() > 0:
-        collected.insert(collected.size(), move_un.get(0))
+        index, bonuses_index = get_index(collected, move_un.get(0))
+        collected.insert(index, move_un.get(0))
+        globals.bonuses[bonuses_index][1] = 1
         move_un.delete(0)
+
+
+def move_bonus_collected_back(event):
+    selection = event.widget.curselection()
+    if selection:
+        index = selection[0]
+        data = event.widget.get(index)
+        move_col.delete(index)
+        collected.insert(get_index(collected, data)[0], data)
 
 
 def move_bonus_collected(event):
@@ -339,7 +368,16 @@ def move_bonus_collected(event):
         index = selection[0]
         data = event.widget.get(index)
         collected.delete(index)
-        move_col.insert(move_col.size(), data)
+        move_col.insert(get_index(move_col, data)[0], data)
+
+
+def move_bonus_uncollected_back(event):
+    selection = event.widget.curselection()
+    if selection:
+        index = selection[0]
+        data = event.widget.get(index)
+        move_un.delete(index)
+        uncollected.insert(get_index(uncollected, data)[0], data)
 
 
 def move_bonus_uncollected(event):
@@ -348,7 +386,7 @@ def move_bonus_uncollected(event):
         index = selection[0]
         data = event.widget.get(index)
         uncollected.delete(index)
-        move_un.insert(move_un.size(), data)
+        move_un.insert(get_index(move_un, data)[0], data)
 
 
 def open_trophies():
