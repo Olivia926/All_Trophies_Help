@@ -1,3 +1,4 @@
+game_window = None
 stop = False
 window = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
 click_positions = []
