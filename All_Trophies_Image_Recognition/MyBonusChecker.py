@@ -3,7 +3,7 @@ from pynput.mouse import Listener
 import pytesseract
 from pynput import keyboard
 import threading
-import dxcam # change
+import dxcam  # change
 import cv2
 
 thread_local = threading.local()
@@ -17,6 +17,11 @@ fps = 6
 
 
 def clear_bonuses():
+    """
+    Makes all bonuses uncollected by setting all the second values in the arrays to 0
+
+    :return: None
+    """
     for i in range(len(globals.bonuses)):
         globals.bonuses[i][1] = 0
 
@@ -213,17 +218,23 @@ def check_bonuses():
 
 
 def find_words(frame):
+    """
+    Finds the words from a screenshot and adds it to a set
+
+    :param: frame: The next frame of the video
+    :return: None
+    """
     global all_words
 
     temp = pytesseract.image_to_string(frame)
     text = temp.split('\n')
     for word in text:
-        all_words.add(str(word))
+        all_words.add(word)
 
 
 def make_recording(top_left, bottom_right):
     """
-    Creates a video recording of the selected screen region and stores every frame in an array
+    Creates a video recording of the selected screen region and grabs the text from them
 
     :param top_left: x,y positions of the top_left click
     :param bottom_right: x,y positions of bottom_right click

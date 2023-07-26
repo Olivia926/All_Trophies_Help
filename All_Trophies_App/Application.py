@@ -7,10 +7,16 @@ window = AppGlobals.window
 
 
 def do_thing():
+    """Temporary thing that will be deleted"""
     print(f"HIHIHIHIHIHIHI")
 
 
 def open_cur():
+    """
+    Opens the frame tied to the number of cur
+
+    :return: None
+    """
     cur = AppGlobals.cur
 
     if cur == 0:
@@ -20,7 +26,13 @@ def open_cur():
     else:
         abf.adjust_bonuses()
 
+
 def create_frames():
+    """
+    Creates the top buttons for the main application window
+
+    :return: None
+    """
     font = {"Impact", 100, "bold"}
     bg = "#010101"
     fg = "#d19a48"
@@ -49,6 +61,11 @@ def create_frames():
 
 
 def create_menus():
+    """
+    Creates the top left menus for saving, opening, and making files as well as other helpful functions
+
+    :return: None
+    """
     menu = tk.Menu(window)
     file_menu = tk.Menu(menu, tearoff=0)
 
@@ -67,6 +84,11 @@ def create_menus():
 
 
 def create_window():
+    """
+    Creates the Application window
+
+    :return: None
+    """
     window.title("All Trophies Helper")
     width = window.winfo_screenwidth()
     height = window.winfo_screenheight()
