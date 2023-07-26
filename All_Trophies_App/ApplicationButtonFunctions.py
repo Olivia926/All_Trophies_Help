@@ -1,3 +1,5 @@
+import sys
+sys.path.append(sys.path[0]+"\\..")
 import globals
 import AppGlobals
 import tkinter as tk

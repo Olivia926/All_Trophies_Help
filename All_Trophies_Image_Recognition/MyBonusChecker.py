@@ -13,7 +13,7 @@ stop = False
 click_positions = []
 all_words = set()
 global_index = 0
-fps = 6
+fps = 8
 
 
 def clear_bonuses():
@@ -101,21 +101,26 @@ def compare_strings(s1, s2):
     :param s2: bonus that we need to find
     :return: True if they match and False if they don't
     """
-    temp1 = ''.join(filter(remove_special_characters, s1))
-    temp2 = ''.join(filter(remove_special_characters, s2))
+    temp1 = ''.join(filter(remove_special_characters, s1)).lower()
+    temp2 = ''.join(filter(remove_special_characters, s2)).lower()
 
-    if temp1[0].isdigit():
-        if temp1[1] != '0':
-            s = list(temp1)
-            s[1] = '5'
-            temp1 = "".join(s)
-    elif not temp1[0].isupper():
-        if temp1 != temp2:
-            return temp1 == temp2[1:]
-        else:
-            return True
+    if temp1[0].isdigit()and temp1[1] != '0':
+        temp1 = temp1[:1] + "5" + temp1[2:]
+    # elif not temp1[0].isupper():
+    #     if temp1 != temp2:
+    #         return temp1 == temp2[1:]
+    #     else:
+    #         return True
 
-    return temp1 == temp2
+    poopy = False
+
+    if temp1 in temp2 and temp1 != temp2 and len(temp1) > 1:
+        # print(f'found {temp1} in {temp2}')
+        if abs(len(temp1) - len(temp2)) <= 2:
+            poopy = True
+            print(f"guessing that {temp1} is suppposed to be {temp2}")
+    
+    return temp1 == temp2 or poopy
 
 
 def start_thread(ind, text):
@@ -127,14 +132,9 @@ def start_thread(ind, text):
     :param text: screenshotted text
     :return: None
     """
-    if (
-        not text.isnumeric()
-        and len(text) >= 3
-        and text[0] != 'x'
-        and text[0] != '-'
-        and text[0] != '—'
-    ):
-        check_arr_start(ind, text)
+    if len(text) > 1:
+        if not text.isnumeric() and text[0] != 'x' and text[0] != '-' and text[0] != '—':
+            check_arr_start(ind, text)
 
 
 def check_arr_start(ind, bonus):
@@ -209,12 +209,25 @@ def check_bonuses():
 
     print("Please wait while we look at the bonuses")
     for word in all_words:
-        t = threading.Thread(target=start_thread, args=[global_index, word])
-        t.start()
-        threads.append(t)
+        for b in globals.bonuses:
+            if word == b[0]:
+                b[1] = 1
+                break
+        else:
+            w = word.lower().replace(' ', '').replace('-', '').replace('—', '').replace('’', '').replace(',', '').replace('.', '')
+            for b in globals.bonuses:
+                b_modified = b[0].lower().replace(' ', '').replace('-', '').replace('\'', '').replace(',', '').replace('.', '')
+                if w in b_modified and (len(w) - len(b_modified) <= 2):
+                    print(f'guessing {word} is {b[0]}')
+                    b[1] = 1
+                    break
+        
+    #     t = threading.Thread(target=start_thread, args=[global_index, word])
+    #     t.start()
+    #     threads.append(t)
 
-    for thread in threads:
-        thread.join()
+    # for thread in threads:
+    #     thread.join()
 
 
 def find_words(frame):
