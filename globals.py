@@ -1,10 +1,4 @@
-game_window = None
-stop = False
 window = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
-click_positions = []
-all_frames = []
-global_index = 0
-fps = 9
 
 bonuses = [['Bird of Prey', 0], ['Combo King', 0], ['Juggler', 0], ['Backstabber', 0], ['Sweeper', 0],
            ['Clean Sweep', 0], ['Meteor Smash', 0], ['Meteor Clear', 0], ['Meteor Master', 0],

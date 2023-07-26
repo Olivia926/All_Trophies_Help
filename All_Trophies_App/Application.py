@@ -20,7 +20,6 @@ def open_cur():
     else:
         abf.adjust_bonuses()
 
-
 def create_frames():
     font = {"Impact", 100, "bold"}
     bg = "#010101"
