@@ -203,7 +203,7 @@ def check_bonuses():
     """
     global all_words
     global global_index
-    threads = []
+    # threads = []
 
     print(all_words)
 
