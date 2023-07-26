@@ -9,6 +9,7 @@ from win32gui import WindowFromPoint, GetWindowText, GetWindowRect
 
 window = AppGlobals.window
 cur = AppGlobals.cur
+game_name = AppGlobals.game_name
 game_window = None
 
 bonuses_frame = tk.Frame(window)
@@ -20,11 +21,22 @@ bonus_org_frame = tk.Frame(window)
 booleans = [0, 0, 0]
 
 
-def get_window_size():
+def get_window_coords():
+    """
+    Gives the X and Y coordinates of the top left and bottom right of the window selected.
+
+    :return: Two tuples in an array
+    """
     return GetWindowRect(game_window)
 
 
 def disable_children(widget):
+    """
+    Recursive function that disables every child widget within a widget.
+
+    :param widget: App widget, such as a listbox, button, window, etc.
+    :return: None
+    """
     for child in widget.winfo_children():
         if isinstance(child, tk.Button) or isinstance(child, tk.Listbox):
             child.configure(state='disabled')
@@ -33,6 +45,12 @@ def disable_children(widget):
 
 
 def enable_children(widget):
+    """
+    Recursive function that enables every child widget within a widget.
+
+    :param widget: App widget, such as a listbox, button, window, etc.
+    :return: None
+    """
     for child in widget.winfo_children():
         if isinstance(child, tk.Button) or isinstance(child, tk.Listbox):
             child.configure(state='normal')
@@ -41,6 +59,13 @@ def enable_children(widget):
 
 
 def hide_cur():
+    """
+    Uses the global variable 'cur' to close off the current frame.
+
+    :return: None
+    """
+    global cur
+
     if cur == 0:
         bonuses_frame.pack_forget()
     elif cur == 1:
@@ -50,10 +75,24 @@ def hide_cur():
 
 
 def open_bonuses():
+    """
+    Function that opens the bonuses frame and displays it to the user.
+
+    :return: None
+    """
     global cur
     global booleans
 
     def get_index(listbox, entry):
+        """
+        Find the index within the listbox for where it should place the current entry. This will also find the index
+        in the bonuses array to be used for checking off that the bonus has been collected.
+
+        :param listbox:
+        :param entry:
+        :return: array containing the index in the listbox to put the current value
+                 and the index of the bonuses array, in that order.
+        """
         bonuses = globals.bonuses
         index = 0
 
@@ -71,6 +110,11 @@ def open_bonuses():
         return END, index
 
     def move_all_bonuses():
+        """
+        Move every bonus from the middle listboxes to the collected and uncollected listboxes
+
+        :return: None
+        """
         while move_col.size() > 0:
             index, bonuses_index = get_index(uncollected, move_col.get(0))
             uncollected.insert(index, move_col.get(0))
@@ -84,6 +128,11 @@ def open_bonuses():
             move_un.delete(0)
 
     def move_bonus_collected_back(event):
+        """
+        Move from the middle listbox to the collected listbox
+
+        :return: None
+        """
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
@@ -92,6 +141,11 @@ def open_bonuses():
             collected.insert(get_index(collected, data)[0], data)
 
     def move_bonus_collected(event):
+        """
+        Move from the collected listbox to the middle listbox
+
+        :return: None
+        """
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
@@ -100,6 +154,12 @@ def open_bonuses():
             move_col.insert(get_index(move_col, data)[0], data)
 
     def move_bonus_uncollected_back(event):
+        """
+        Move from the middle listbox to the uncollected listbox
+
+        :return: None
+        """
+
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
@@ -108,6 +168,12 @@ def open_bonuses():
             uncollected.insert(get_index(uncollected, data)[0], data)
 
     def move_bonus_uncollected(event):
+        """
+        Move from the uncollected listbox to the middle listbox
+
+        :return: None
+        """
+
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
@@ -257,6 +323,11 @@ def open_bonuses():
         tk.Button(frame, text="Next", command=exit_btn).pack(side='right')
 
     def fill_listboxes():
+        """
+        Use the bonuses array to insert the bonuses into the collected and uncollected listboxes
+
+        :return: None
+        """
         for bonus, state in globals.bonuses:
             if state == 0:
                 uncollected.insert(uncollected.size(), bonus)
@@ -264,12 +335,22 @@ def open_bonuses():
                 collected.insert(collected.size(), bonus)
 
     def clear_listboxes():
+        """
+        Delete every entry in the 2 middle, uncollected, and collected listboxes
+
+        :return: None
+        """
         move_un.delete(0, END)
         move_col.delete(0, END)
         collected.delete(0, END)
         uncollected.delete(0, END)
 
     def no_window_selected():
+        """
+        Give user dialogue that tells them that they need to select a window to use the program
+
+        :return: None
+        """
         new_window = tk.Toplevel(window, width=200, height=750)
         new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
         tk.Label(new_window, font={'Times New Roman', 20, 'bold'},
@@ -277,6 +358,11 @@ def open_bonuses():
                       f'Please select a window using the "Select Window" button').pack()
 
     def auto_complete():
+        """
+        Runs MyBonusChecker and disables user input to the main window
+
+        :return: None
+        """
         if game_window is None:
             no_window_selected()
             return
@@ -287,7 +373,13 @@ def open_bonuses():
         run_bonus_checker()
 
     def run_bonus_checker():
+        """
+        Runs MyBonusChecker and gives user input to the application once it is done checking
+
+        :return: None
+        """
         from All_Trophies_Image_Recognition.MyBonusChecker import main
+
         label = tk.Label(auto_checker_frame, text="Checking Bonuses...")
         label.pack(side='top')
         check_bonuses_btn.config(state='disabled')
@@ -314,14 +406,27 @@ def open_bonuses():
         schedule_check()
 
     def on_click(x, y, button, pressed):
+        """
+        Allows the user to select a window and takes HWND of the window
+
+        :return: False when the user clicks
+        """
         global game_window
+        global game_name
 
         if pressed:
             game_window = WindowFromPoint((x, y))
+            game_name = GetWindowText(game_window)
 
         return False
 
     def select_window():
+        """
+        Allows the user to select the window they want to find bonuses on. Will display the name of the window to the
+        application.
+
+        :return: None
+        """
         global game_window
 
         game_window = None
