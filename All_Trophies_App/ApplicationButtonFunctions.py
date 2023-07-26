@@ -4,13 +4,12 @@ import tkinter as tk
 from tkinter import END
 from tkVideoPlayer import TkinterVideo
 import threading
-from pyautogui import getAllWindows
 from pynput.mouse import Listener
-from win32gui import WindowFromPoint, GetWindowText
+from win32gui import WindowFromPoint, GetWindowText, GetWindowRect
 
 window = AppGlobals.window
 cur = AppGlobals.cur
-game_window = globals.game_window
+game_window = None
 
 bonuses_frame = tk.Frame(window)
 middle = tk.Frame(bonuses_frame)
@@ -19,6 +18,10 @@ trophies_frame = tk.Frame(window)
 bonus_org_frame = tk.Frame(window)
 
 booleans = [0, 0, 0]
+
+
+def get_window_size():
+    return GetWindowRect(game_window)
 
 
 def disable_children(widget):
@@ -48,7 +51,7 @@ def hide_cur():
 
 def open_bonuses():
     global cur
-    global sel_window
+    global booleans
 
     def get_index(listbox, entry):
         bonuses = globals.bonuses
@@ -266,7 +269,18 @@ def open_bonuses():
         collected.delete(0, END)
         uncollected.delete(0, END)
 
+    def no_window_selected():
+        new_window = tk.Toplevel(window, width=200, height=750)
+        new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
+        tk.Label(new_window, font={'Times New Roman', 20, 'bold'},
+                 text=f'You have not selected a window yet!\n'
+                      f'Please select a window using the "Select Window" button').pack()
+
     def auto_complete():
+        if game_window is None:
+            no_window_selected()
+            return
+
         clear_listboxes()
         disable_children(bonuses_frame)
         disable_children(window)
@@ -382,7 +396,7 @@ def open_bonuses():
         auto_checker_frame = tk.Frame(bonuses_frame)
         check_bonuses_btn = tk.Button(auto_checker_frame, text="Use Auto Checker", command=auto_complete)
 
-        winbtn = tk.Button(auto_checker_frame, text="Window not selected yet!", command=select_window)
+        winbtn = tk.Button(auto_checker_frame, text="Select Window", command=select_window)
 
         check_bonuses_btn.pack(side='bottom')
         winbtn.pack(side='bottom')

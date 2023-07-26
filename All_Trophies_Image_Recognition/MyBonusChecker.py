@@ -1,17 +1,19 @@
 import globals
 from pynput.mouse import Listener
 import pytesseract
-from PIL import Image
 from pynput import keyboard
-import concurrent.futures
 import threading
-from functools import partial
-import dxcam
-import time
-import math
+import dxcam # change
+import cv2
 
 thread_local = threading.local()
 threadlock = threading.Lock()
+
+stop = False
+click_positions = []
+all_words = set()
+global_index = 0
+fps = 6
 
 
 def clear_bonuses():
@@ -31,10 +33,10 @@ def on_click(x, y, button, pressed):
     :return: Returns False if function has found 2 mouse clicks
     """
     if pressed:
-        globals.click_positions.append((x, y))
-    if len(globals.click_positions) == 1:
+        click_positions.append((x, y))
+    if len(click_positions) == 1:
         print(f'Make a second click in the bottom right')
-    if len(globals.click_positions) == 2:
+    if len(click_positions) == 2:
         return False
 
 
@@ -45,9 +47,11 @@ def on_press(key):
     :param key: Keyboard input key (will eventually be user specified)
     :return: None
     """
+    global stop
+
     try:
         if key.char == 'q':
-            globals.stop = True
+            stop = True
     except AttributeError:
         pass
 
@@ -66,7 +70,7 @@ def get_two_click_coordinates():
             listener.join()
         clicks += 1
 
-    return globals.click_positions
+    return click_positions
 
 
 def remove_special_characters(character):
@@ -119,11 +123,11 @@ def start_thread(ind, text):
     :return: None
     """
     if (
-        len(text) >= 3
+        not text.isnumeric()
+        and len(text) >= 3
         and text[0] != 'x'
         and text[0] != '-'
         and text[0] != '—'
-        and not text.isnumeric()
     ):
         check_arr_start(ind, text)
 
@@ -163,6 +167,7 @@ def recursive_arr_check(start_ind, ind, bonus, op, event):
     :param event: boolean value that stops other child thread if set
     :return: None
     """
+    global global_index
     if event.is_set():
         return
 
@@ -176,7 +181,7 @@ def recursive_arr_check(start_ind, ind, bonus, op, event):
         with threadlock:
             if globals.bonuses[ind][1] == 0:
                 globals.bonuses[ind][1] = 1
-                globals.global_index += 1
+                global_index += 1
         return
 
     if ind == (start_ind + globals.halfbonus) % len(globals.bonuses):
@@ -191,21 +196,29 @@ def check_bonuses():
 
     :return: None
     """
-    start = time.time()
+    global all_words
+    global global_index
+    threads = []
+
+    print(all_words)
+
     print("Please wait while we look at the bonuses")
-    for i in range(len(globals.all_frames)):
-        frame = Image.fromarray(globals.all_frames[i])
-        temp = pytesseract.image_to_string(frame)
-        text = temp.split('\n')
-        func = partial(start_thread, globals.global_index)
-        
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(text)) as executor:
-            executor.map(func, text)
+    for word in all_words:
+        t = threading.Thread(target=start_thread, args=[global_index, word])
+        t.start()
+        threads.append(t)
 
-        if globals.bonuses[len(globals.bonuses) - 1][1] == 1:
-            break
+    for thread in threads:
+        thread.join()
 
-    print(f"Finished looking at bonuses in {math.ceil(time.time() - start)} seconds")
+
+def find_words(frame):
+    global all_words
+
+    temp = pytesseract.image_to_string(frame)
+    text = temp.split('\n')
+    for word in text:
+        all_words.add(str(word))
 
 
 def make_recording(top_left, bottom_right):
@@ -216,47 +229,42 @@ def make_recording(top_left, bottom_right):
     :param bottom_right: x,y positions of bottom_right click
     :return: None
     """
+    global fps
+    global stop
     camera = dxcam.create()
     region = (top_left[0], top_left[1], bottom_right[0], bottom_right[1])
 
+    threads = []
+    stop = False
+
     print(f"Press 'q' to stop recording")
     with keyboard.Listener(on_press=on_press):
-        camera.start(region=region, target_fps=globals.fps)
-        while not globals.stop:
-            globals.all_frames.append(camera.get_latest_frame())
+        camera.start(region=region, target_fps=fps)
+        while not stop:
+            t = threading.Thread(target=find_words, args=[camera.get_latest_frame()])
+            t.start()
+            threads.append(t)
+
+    for thread in threads:
+        thread.join()
 
     camera.stop()
 
 
 def main():
-    globals.click_positions.clear()
+    # from All_Trophies_App.ApplicationButtonFunctions import get_window_size
+
+    global click_positions
+
+    click_positions.clear()
 
     coordinates = get_two_click_coordinates()
 
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    # window = get_window_size()
 
+    # coordinates = [[window[0], window[1]],
+    #                [window[2], window[3]]]
+    # coordinates = find a way to get specific spot in window based on image
     make_recording(coordinates[0], coordinates[1])
     check_bonuses()
-
-    """
-    with open('Found1.txt', 'w') as f:
-        for i in range(len(globals.bonuses)):
-            if globals.bonuses[i][1]:
-                f.write(f'{globals.bonuses[i][0]}\n')
-
-    f.close()
-    """
-
-    """
-    if globals.global_index + 1 < len(globals.bonuses):
-        print(f'Missing Bonuses')
-        for i in range(len(globals.bonuses)):
-            if globals.bonuses[i][1] == 0:
-                print(globals.bonuses[i][0])
-    """
-
-
-"""
-if __name__ == "__main__":
-    main()
-"""
