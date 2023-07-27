@@ -209,6 +209,11 @@ def check_bonuses():
 
     print("Please wait while we look at the bonuses")
     for word in all_words:
+        if len(word) <= 1:
+            continue
+        elif word[0] == 'x':
+            continue
+        
         for b in globals.bonuses:
             if word == b[0]:
                 b[1] = 1
@@ -216,8 +221,10 @@ def check_bonuses():
         else:
             w = word.lower().replace(' ', '').replace('-', '').replace('—', '').replace('’', '').replace(',', '').replace('.', '')
             for b in globals.bonuses:
+                if b[1] == 1:
+                    continue
                 b_modified = b[0].lower().replace(' ', '').replace('-', '').replace('\'', '').replace(',', '').replace('.', '')
-                if w in b_modified and (len(w) - len(b_modified) <= 2):
+                if w in b_modified and ((len(w) - len(b_modified)) <= 2):
                     print(f'guessing {word} is {b[0]}')
                     b[1] = 1
                     break
