@@ -1,4 +1,4 @@
-import globals
+from globals import bonuses
 from pynput.mouse import Listener
 import pytesseract
 from pynput import keyboard
@@ -13,7 +13,7 @@ stop = False
 click_positions = []
 all_words = set()
 global_index = 0
-fps = 6
+fps = 8
 
 
 def clear_bonuses():
@@ -22,8 +22,8 @@ def clear_bonuses():
 
     :return: None
     """
-    for i in range(len(globals.bonuses)):
-        globals.bonuses[i][1] = 0
+    for i in range(len(bonuses)):
+        bonuses[i][1] = 0
 
 
 def on_click(x, y, button, pressed):
@@ -147,8 +147,8 @@ def check_arr_start(ind, bonus):
     :param bonus: bonus found from screenshot
     :return: None
     """
-    if compare_strings(bonus, globals.bonuses[ind][0]):
-        globals.bonuses[ind][1] = 1
+    if compare_strings(bonus, bonuses[ind][0]):
+        bonuses[ind][1] = 1
     else:
         event = threading.Event()
         pos = threading.Thread(target=recursive_arr_check, args=(ind, ind + 1, bonus, 1, event))
@@ -176,20 +176,20 @@ def recursive_arr_check(start_ind, ind, bonus, op, event):
     if event.is_set():
         return
 
-    if ind >= len(globals.bonuses):
+    if ind >= len(bonuses):
         ind = 0
     elif ind < 0:
-        ind = len(globals.bonuses) - 1
+        ind = len(bonuses) - 1
 
-    if compare_strings(bonus, globals.bonuses[ind][0]):
+    if compare_strings(bonus, bonuses[ind][0]):
         event.set()
         with threadlock:
-            if globals.bonuses[ind][1] == 0:
-                globals.bonuses[ind][1] = 1
+            if bonuses[ind][1] == 0:
+                bonuses[ind][1] = 1
                 global_index += 1
         return
 
-    if ind == (start_ind + globals.halfbonus) % len(globals.bonuses):
+    if ind == (start_ind + int(len(bonuses) / 2) + 1) % len(bonuses):
         return
 
     recursive_arr_check(start_ind, ind + op, bonus, op, event)
@@ -242,7 +242,7 @@ def make_recording(top_left, bottom_right):
     """
     global fps
     global stop
-    camera = dxcam.create()
+    camera = dxcam.create(max_buffer_len=16)
     region = (top_left[0], top_left[1], bottom_right[0], bottom_right[1])
 
     threads = []
