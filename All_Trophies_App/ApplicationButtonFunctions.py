@@ -81,6 +81,9 @@ def open_bonuses():
     global cur
     global booleans
 
+    search_entries_l = []
+    search_entries_r = []
+
     def get_index(listbox, entry):
         """
         Find the index within the listbox for where it should place the current entry. This will also find the index
@@ -378,6 +381,8 @@ def open_trophies():
         left_menu.menu.add_command(label='Sick', command=lambda: left_bucket("Sick"))
         left_menu.menu.add_command(label='Hats', command=lambda: left_bucket("Hats"))
         left_menu.menu.add_command(label='Villains', command=lambda: left_bucket("Villains"))
+        left_menu.menu.add_command(label='Vacuum Luigi', command=lambda: left_bucket("Vacuum Luigi"))
+        left_menu.menu.add_command(label='Dog', command=lambda: left_bucket("Dog"))
         left_menu.menu.add_command(label='Lotto', command=lambda: left_bucket("Lotto"))
 
         right_menu.menu.add_command(label='All', command=lambda: right_bucket("All"))
@@ -399,10 +404,35 @@ def open_trophies():
         right_menu.menu.add_command(label='Sick', command=lambda: right_bucket("Sick"))
         right_menu.menu.add_command(label='Hats', command=lambda: right_bucket("Hats"))
         right_menu.menu.add_command(label='Villains', command=lambda: right_bucket("Villains"))
+        right_menu.menu.add_command(label='Vacuum Luigi', command=lambda: right_bucket("Vacuum Luigi"))
+        right_menu.menu.add_command(label='Dog', command=lambda: right_bucket("Dog"))
         right_menu.menu.add_command(label='Lotto', command=lambda: right_bucket("Lotto"))
 
         left_menu.pack(side='bottom')
         right_menu.pack(side='bottom')
+
+    def start_rng(rng_type):
+        new_window = tk.Toplevel(window)
+        new_window.geometry(f"{int(window.winfo_width() / 2)}x{int(window.winfo_height() / 2)}")
+        center(new_window)
+
+    def center(win):
+        """
+        Centers a tkinter window
+
+        :param win: the window to center
+        """
+        win.update_idletasks()
+        width = win.winfo_width()
+        frm_width = win.winfo_rootx() - win.winfo_x()
+        win_width = width + 2 * frm_width
+        height = win.winfo_height()
+        titlebar_height = win.winfo_rooty() - win.winfo_y()
+        win_height = height + titlebar_height + frm_width
+        x = win.winfo_screenwidth() // 2 - win_width // 2
+        y = win.winfo_screenheight() // 2 - win_height // 2
+        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        win.deiconify()
 
     def fill_listboxes():
         """
@@ -686,8 +716,8 @@ def open_trophies():
         move_col.pack(side="top")
 
         auto_checker_frame = tk.Frame(trophies_frame)
-        birdobtn = tk.Button(auto_checker_frame, text="Birdo RNG Manip")
-        advbtn = tk.Button(auto_checker_frame, text="Adventure 1-1 RNG Manip")
+        birdobtn = tk.Button(auto_checker_frame, text="Birdo RNG Manip", command=lambda: start_rng("birdo"))
+        advbtn = tk.Button(auto_checker_frame, text="Adventure 1-1 RNG Manip", command=lambda: start_rng("adventure"))
         check_trophies_btn = tk.Button(auto_checker_frame, text="Auto Check Trophies", command=auto_complete)
 
         birdobtn.pack(side='top')
