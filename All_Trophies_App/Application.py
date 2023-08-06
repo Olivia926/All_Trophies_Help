@@ -65,7 +65,7 @@ def create_frames():
     :return: None
     """
 
-    font = {"Impact", 100, "bold"}
+    font = ["Impact", 15, "bold"]
     bg = "#010101"
     fg = "#d19a48"
     ab = "#fae400"
@@ -157,7 +157,7 @@ def help_1():
     frame = tk.Frame(new_window, width=200, height=750)
     frame.pack()
     new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
-    text = tk.Text(frame, font={'Times New Roman', 20, 'bold'})
+    text = tk.Text(frame, font=['Times New Roman', 15])
     text.pack()
     text.insert(END, f"Click on the top left of the bonuses section to start\n")
     text.insert(END, f"(See reference image below)\n")
@@ -178,7 +178,7 @@ def help_2():
     frame = tk.Frame(new_window, width=200, height=750)
     frame.pack()
     new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
-    text = tk.Text(frame, font={'Times New Roman', 20, 'bold'})
+    text = tk.Text(frame, font=['Times New Roman', 15])
     text.pack()
     text.insert(END, f"Click on the bottom right of the bonuses section\n")
     photo = tk.PhotoImage(file=file)
@@ -197,7 +197,7 @@ def help_3():
     frame = tk.Frame(new_window)
     frame.pack()
     new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
-    label = tk.Label(frame, font={'Times New Roman', 20, 'bold'},
+    label = tk.Label(frame, font=['Times New Roman', 15, 'bold'],
                      text=f"Scroll the screen down quickly using the control stick\n")
     label.pack()
     video = TkinterVideo(frame)
