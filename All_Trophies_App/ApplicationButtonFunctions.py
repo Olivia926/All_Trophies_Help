@@ -15,6 +15,25 @@ bonus_org_frame = tk.Frame(window)
 booleans = [0, 0, 0]
 
 
+def center(win):
+    """
+    Centers a tkinter window
+
+    :param win: the window to center
+    """
+    win.update_idletasks()
+    width = win.winfo_width()
+    frm_width = win.winfo_rootx() - win.winfo_x()
+    win_width = width + 2 * frm_width
+    height = win.winfo_height()
+    titlebar_height = win.winfo_rooty() - win.winfo_y()
+    win_height = height + titlebar_height + frm_width
+    x = win.winfo_screenwidth() // 2 - win_width // 2
+    y = win.winfo_screenheight() // 2 - win_height // 2
+    win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+    win.deiconify()
+
+
 def no_window_selected():
     """
     Give user dialogue that tells them that they need to select a window to use the program
@@ -36,7 +55,7 @@ def disable_children(widget):
     :return: None
     """
     for child in widget.winfo_children():
-        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox):
+        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) or isinstance(child, tk.Menubutton):
             child.configure(state='disabled')
         if isinstance(child, tk.Frame):
             disable_children(child)
@@ -50,7 +69,7 @@ def enable_children(widget):
     :return: None
     """
     for child in widget.winfo_children():
-        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox):
+        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) or isinstance(child, tk.Menubutton):
             child.configure(state='normal')
         if isinstance(child, tk.Frame):
             enable_children(child)
@@ -216,7 +235,6 @@ def open_bonuses():
             return
 
         clear_listboxes()
-        disable_children(bonuses_frame)
         disable_children(window)
         run_bonus_checker()
 
@@ -235,7 +253,6 @@ def open_bonuses():
         t.start()
 
         def auto_complete_2():
-            enable_children(bonuses_frame)
             enable_children(window)
             fill_listboxes()
             open_bonuses()
@@ -343,6 +360,11 @@ def open_trophies():
     r_buc = "All"
     l_buc = "All"
 
+    def enable_all():
+        enable_children(window)
+        fill_listboxes()
+        open_trophies()
+
     def set_menus():
         tk.Label(left_frame,
                  text="Collected Trophies",
@@ -412,27 +434,127 @@ def open_trophies():
         right_menu.pack(side='bottom')
 
     def start_rng(rng_type):
+        tags = globals.TAGS
+        tag_bool = [0, 0, 0, 0, 0]
+        disable_children(window)
+
+        def on_closing():
+            enable_children(window)
+            new_window.destroy()
+
         new_window = tk.Toplevel(window)
-        new_window.geometry(f"{int(window.winfo_width() / 2)}x{int(window.winfo_height() / 2)}")
+        new_window.protocol("WM_DELETE_WINDOW", on_closing)
+        new_window.geometry(f"{int(window.winfo_width() * 3/ 5)}x{int(window.winfo_height() * 5 / 9)}")
         center(new_window)
 
-    def center(win):
-        """
-        Centers a tkinter window
+        def check_finish():
+            for num in tag_bool:
+                if num == 0:
+                    if rng_type == 'birdo':
+                        birdo.config(state='disabled')
+                    else:
+                        adv.config(state='disabled')
+                    return
+            if rng_type == 'birdo':
+                birdo.config(state='normal')
+            else:
+                adv.config(state='normal')
 
-        :param win: the window to center
-        """
-        win.update_idletasks()
-        width = win.winfo_width()
-        frm_width = win.winfo_rootx() - win.winfo_x()
-        win_width = width + 2 * frm_width
-        height = win.winfo_height()
-        titlebar_height = win.winfo_rooty() - win.winfo_y()
-        win_height = height + titlebar_height + frm_width
-        x = win.winfo_screenwidth() // 2 - win_width // 2
-        y = win.winfo_screenheight() // 2 - win_height // 2
-        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-        win.deiconify()
+        def text_settings(text, identifier):
+            if character_limit(text):
+                text.set(text.get().upper())
+
+            check_tag(text, identifier)
+
+        def check_tag(text, identifier):
+            if len(text.get()) == 4:
+                if text.get() in tags:
+                    tag_bool[identifier] = 1
+                    check_finish()
+                    return
+            elif len(text.get()) == 3:
+                if text.get() in tags:
+                    tag_bool[identifier] = 1
+                    check_finish()
+                    return
+
+            if tag_bool[identifier]:
+                tag_bool[identifier] = 0
+                check_finish()
+
+        def character_limit(text):
+            if len(text.get()) > 4:
+                text.set(text.get()[:-1].upper())
+                return 0
+
+            return 1
+
+        def birdo_rng():
+            print("Birdo")
+
+        def adventure_rng():
+            print("Adventure")
+
+        label = tk.Label(new_window, text='Press "Random" in the Character Selection Screen tag selection window 5 '
+                                          'times and type them into the following boxes! \n\nORDER MATTERS!\n',
+                         justify='center', wraplength=new_window.winfo_width(), font=['Times New Roman', 20, 'bold'])
+        label.pack(side='top')
+
+        text_frame = tk.Frame(new_window)
+
+        text_frame.grid_columnconfigure(0, weight=1, uniform="text")
+        text_frame.grid_columnconfigure(1, weight=1, uniform="text")
+        text_frame.grid_columnconfigure(2, weight=1, uniform="text")
+        text_frame.grid_columnconfigure(3, weight=1, uniform="text")
+        text_frame.grid_columnconfigure(3, weight=1, uniform="text")
+
+        tk.Label(text_frame, text="Entry 1", font=['Times New Roman', 15, 'bold'],
+                 justify='center').grid(row=0, column=0)
+        tk.Label(text_frame, text="Entry 2", font=['Times New Roman', 15, 'bold'],
+                 justify='center').grid(row=0, column=1)
+        tk.Label(text_frame, text="Entry 3", font=['Times New Roman', 15, 'bold'],
+                 justify='center').grid(row=0, column=2)
+        tk.Label(text_frame, text="Entry 4", font=['Times New Roman', 15, 'bold'],
+                 justify='center').grid(row=0, column=3)
+        tk.Label(text_frame, text="Entry 5", font=['Times New Roman', 15, 'bold'],
+                 justify='center').grid(row=0, column=4)
+
+        text_1 = tk.StringVar()
+        text_2 = tk.StringVar()
+        text_3 = tk.StringVar()
+        text_4 = tk.StringVar()
+        text_5 = tk.StringVar()
+
+        box_1 = tk.Entry(text_frame, textvariable=text_1)
+        box_2 = tk.Entry(text_frame, textvariable=text_2)
+        box_3 = tk.Entry(text_frame, textvariable=text_3)
+        box_4 = tk.Entry(text_frame, textvariable=text_4)
+        box_5 = tk.Entry(text_frame, textvariable=text_5)
+
+        box_1.grid(row=1, column=0)
+        box_2.grid(row=1, column=1)
+        box_3.grid(row=1, column=2)
+        box_4.grid(row=1, column=3)
+        box_5.grid(row=1, column=4)
+
+        text_1.trace('w', lambda *args: text_settings(text_1, 0))
+        text_2.trace('w', lambda *args: text_settings(text_2, 1))
+        text_3.trace('w', lambda *args: text_settings(text_3, 2))
+        text_4.trace('w', lambda *args: text_settings(text_4, 3))
+        text_5.trace('w', lambda *args: text_settings(text_5, 4))
+
+        if rng_type == 'birdo':
+            birdo = tk.Button(text_frame, text="Search For Birdo", font=['Times New Roman', 15, 'bold'],
+                              justify='center', command=birdo_rng)
+            birdo.config(state='disabled')
+            birdo.grid(row=3, column=2)
+        else:
+            adv = tk.Button(text_frame, text="Search For Adventure", font=['Times New Roman', 15, 'bold'],
+                            justify='center', command=adventure_rng)
+            adv.config(state='disabled')
+            adv.grid(row=3, column=2)
+
+        text_frame.pack()
 
     def fill_listboxes():
         """
@@ -619,21 +741,15 @@ def open_trophies():
 
         label = tk.Label(auto_checker_frame, text="Checking Trophies...")
         label.pack(side='top')
-        check_trophies_btn.config(state='disabled')
+        # check_trophies_btn.config(state='disabled')
         t = threading.Thread(target=main)
         t.start()
-
-        def auto_complete_2():
-            enable_children(trophies_frame)
-            enable_children(window)
-            fill_listboxes()
-            open_trophies()
 
         def check_if_done():
             if not t.is_alive():
                 label.pack_forget()
-                check_trophies_btn.config(state='normal')
-                auto_complete_2()
+                # check_trophies_btn.config(state='normal')
+                enable_all()
             else:
                 schedule_check()
 
@@ -718,11 +834,11 @@ def open_trophies():
         auto_checker_frame = tk.Frame(trophies_frame)
         birdobtn = tk.Button(auto_checker_frame, text="Birdo RNG Manip", command=lambda: start_rng("birdo"))
         advbtn = tk.Button(auto_checker_frame, text="Adventure 1-1 RNG Manip", command=lambda: start_rng("adventure"))
-        check_trophies_btn = tk.Button(auto_checker_frame, text="Auto Check Trophies", command=auto_complete)
+        # check_trophies_btn = tk.Button(auto_checker_frame, text="Auto Check Trophies", command=auto_complete)
 
         birdobtn.pack(side='top')
         advbtn.pack(side='top')
-        check_trophies_btn.pack(side='top')
+        # check_trophies_btn.pack(side='top')
 
         middle.grid(row=1, column=2)
         auto_checker_frame.grid(row=1, column=0)

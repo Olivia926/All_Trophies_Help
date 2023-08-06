@@ -110,3 +110,14 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Suicune', 0, 2, 'Lotto'], ['Tingle', 0, 2, 'Lotto'], ['Turtle', 0, 2, 'Lotto'],
             ['Venusaur', 0, 2, 'Lotto'], ['Waluigi', 0, 2, 'Lotto'], ['Whispy Woods', 0, 2, 'Lotto'],
             ['Zapdos', 0, 2, 'Lotto']]
+
+TAGS = ['AAAA','1DER','2BIT','2L8','2PAY','401K','4BDN','4BY4','4EVA','7HVN','AOK','ARCH','ARN','ASH','BAST','BBBB',
+        'BCUZ','BETA','BOBO','BOMB','BONE','BOO','BORT', 'BOZO','BUB','BUD','BUZZ','BYRN','CHUM','COOP','CUBE','CUD',
+        'DAYZ','DIRT','DIVA','DNCR','DUCK','DUD','DUFF','DV8','ED','ELBO','FAMI','FIDO','FILO','FIRE', 'FLAV','FLEA',
+        'FLYN','GBA','GCN','GLUV','GR8','GRIT','GRRL','GUST','GUT','HAMB','HAND','HELA','HEYU','HI5','HIKU','HOOD',
+        'HYDE','IGGY','IKE','IMPA','JAZZ', 'JEKL','JOJO','JUNK','KEY','KILA','KITY','KLOB','KNEE','L33T','L8ER','LCD',
+        'LOKI','LULU','MAC','MAMA','ME','MILO','MIST','MOJO','MOSH','NADA','ZZZZ','NAVI', 'NELL','NEWT','NOOK','NEWB',
+        'ODIN','OLAF','OOPS','OPUS','PAPA','PIT','POP','PKMN','QTPI','RAM','RNDM','ROBN','ROT8','RUTO','SAMI','SET',
+        'SETI','SHIG','SK8R', 'SLIM','SMOK','SNES','SNTA','SPUD','STAR','THOR','THUG','TIRE','TLOZ','TNDO','TOAD',
+        'TOMM','UNO','VIVI','WALK','WART','WARZ','WITH','YETI','YNOT','ZAXO', 'ZETA','ZOD','ZOE','WORM','GEEK','DUDE',
+        'WYRN','BLOB']
