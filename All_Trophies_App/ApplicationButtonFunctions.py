@@ -100,8 +100,11 @@ def open_bonuses():
     global cur
     global booleans
 
-    search_entries_l = []
-    search_entries_r = []
+    l_search = []
+    r_search = []
+
+    l_search_query = tk.StringVar()
+    r_search_query = tk.StringVar()
 
     def get_index(listbox, entry):
         """
@@ -230,10 +233,11 @@ def open_bonuses():
 
         :return: None
         """
+        """
         if game_window is None:
             no_window_selected()
             return
-
+        """
         clear_listboxes()
         disable_children(window)
         run_bonus_checker()
@@ -356,6 +360,12 @@ def open_trophies():
 
     hidden_left = []
     hidden_right = []
+
+    l_search = []
+    r_search = []
+
+    l_search_query = tk.StringVar()
+    r_search_query = tk.StringVar()
 
     r_buc = "All"
     l_buc = "All"
@@ -525,17 +535,11 @@ def open_trophies():
         text_4 = tk.StringVar()
         text_5 = tk.StringVar()
 
-        box_1 = tk.Entry(text_frame, textvariable=text_1)
-        box_2 = tk.Entry(text_frame, textvariable=text_2)
-        box_3 = tk.Entry(text_frame, textvariable=text_3)
-        box_4 = tk.Entry(text_frame, textvariable=text_4)
-        box_5 = tk.Entry(text_frame, textvariable=text_5)
-
-        box_1.grid(row=1, column=0)
-        box_2.grid(row=1, column=1)
-        box_3.grid(row=1, column=2)
-        box_4.grid(row=1, column=3)
-        box_5.grid(row=1, column=4)
+        tk.Entry(text_frame, textvariable=text_1).grid(row=1, column=0)
+        tk.Entry(text_frame, textvariable=text_2).grid(row=1, column=1)
+        tk.Entry(text_frame, textvariable=text_3).grid(row=1, column=2)
+        tk.Entry(text_frame, textvariable=text_4).grid(row=1, column=3)
+        tk.Entry(text_frame, textvariable=text_5).grid(row=1, column=4)
 
         text_1.trace('w', lambda *args: text_settings(text_1, 0))
         text_2.trace('w', lambda *args: text_settings(text_2, 1))
@@ -603,6 +607,23 @@ def open_trophies():
         trophies = globals.trophies
         nonlocal r_buc
         nonlocal l_buc
+        nonlocal r_search
+        nonlocal r_search_query
+        nonlocal l_search
+        nonlocal r_search_query
+
+        r_search_query.set('')
+        l_search_query.set('')
+
+        while len(r_search) > 0:
+            val = r_search.pop()
+            index, _ = get_index(uncollected, val)
+            uncollected.insert(index, val)
+
+        while len(l_search) > 0:
+            val = l_search.pop()
+            index, _ = get_index(collected, val)
+            collected.insert(index, val)
 
         while move_col.size() > 0:
             index, trophies_index = get_index(uncollected, move_col.get(0))
@@ -630,7 +651,86 @@ def open_trophies():
             trophies[trophies_index][1] = 1
             move_un.delete(0)
 
+    def l_search_update():
+        nonlocal l_search_query
+        nonlocal collected
+        nonlocal l_search
+
+        s = r_search_query.get().lower()
+        n = len(s)
+
+        search_index = 0
+        search_len = len(l_search)
+
+        index = 0
+        listbox_len = int(collected.size())
+
+        if s == '':
+            while len(l_search) > 0:
+                val = l_search.pop()
+                index, _ = get_index(collected, val)
+                collected.insert(index, val)
+            return
+
+        while search_index < int(search_len):
+            if l_search[search_index][0:n].lower() == s:
+                index, _ = get_index(collected, l_search[search_index])
+                collected.insert(index, l_search[search_index])
+                l_search.pop(search_index)
+                search_len -= 1
+            else:
+                search_index += 1
+
+        while index < int(listbox_len):
+            if collected.get(index)[0:n].lower() != s:
+                l_search.append(collected.get(index))
+                collected.delete(index)
+                listbox_len -= 1
+            else:
+                index += 1
+
+    def r_search_update():
+        nonlocal r_search_query
+        nonlocal uncollected
+        nonlocal r_search
+
+        s = r_search_query.get().lower()
+        n = len(s)
+
+        search_index = 0
+        search_len = len(r_search)
+
+        index = 0
+        listbox_len = int(uncollected.size())
+
+        if s == '':
+            while len(r_search) > 0:
+                val = r_search.pop()
+                index, _ = get_index(uncollected, val)
+                uncollected.insert(index, val)
+            return
+
+        while search_index < int(search_len):
+            if r_search[search_index][0:n].lower() == s:
+                index, _ = get_index(uncollected, r_search[search_index])
+                uncollected.insert(index, r_search[search_index])
+                r_search.pop(search_index)
+                search_len -= 1
+            else:
+                search_index += 1
+
+        while index < int(listbox_len):
+            if uncollected.get(index)[0:n].lower() != s:
+                r_search.append(uncollected.get(index))
+                uncollected.delete(index)
+                listbox_len -= 1
+            else:
+                index += 1
+
     def move_left_trophies():
+        nonlocal collected
+        nonlocal hidden_left
+
         while len(hidden_left) > 0:
             index, _ = get_index(collected, hidden_left[len(hidden_left) - 1])
             collected.insert(index, hidden_left.pop())
@@ -638,6 +738,16 @@ def open_trophies():
     def left_bucket(bucket):
         trophies = globals.trophies
         nonlocal l_buc
+        nonlocal l_search_query
+        nonlocal l_search
+        nonlocal collected
+
+        l_search_query.set('')
+
+        while len(l_search) > 0:
+            val = l_search.pop()
+            index, _ = get_index(collected, val)
+            collected.insert(index, val)
 
         l_buc = bucket
         move_left_trophies()
@@ -649,6 +759,9 @@ def open_trophies():
                     collected.delete(i)
 
     def move_right_trophies():
+        nonlocal hidden_right
+        nonlocal uncollected
+
         while len(hidden_right) > 0:
             index, _ = get_index(uncollected, hidden_right[len(hidden_right) - 1])
             uncollected.insert(index, hidden_right.pop())
@@ -656,6 +769,16 @@ def open_trophies():
     def right_bucket(bucket):
         trophies = globals.trophies
         nonlocal r_buc
+        nonlocal r_search
+        nonlocal r_search_query
+        nonlocal uncollected
+
+        r_search_query.set('')
+
+        while len(r_search) > 0:
+            val = r_search.pop()
+            index, _ = get_index(uncollected, val)
+            uncollected.insert(index, val)
 
         r_buc = bucket
         move_right_trophies()
@@ -778,6 +901,11 @@ def open_trophies():
         fg = "#fdfdfd"
 
         middle = tk.Frame(trophies_frame)
+        l_listbox_frame = tk.Frame(trophies_frame)
+        r_listbox_frame = tk.Frame(trophies_frame)
+
+        l_listbox_frame.grid(row=1, column=1)
+        r_listbox_frame.grid(row=1, column=3)
 
         move_un = tk.Listbox(middle,
                              font=("Franklin_Gothic_Medium", 10, "bold"),
@@ -791,7 +919,7 @@ def open_trophies():
                               height=18,
                               selectmode=tk.SINGLE)
 
-        collected = tk.Listbox(trophies_frame,
+        collected = tk.Listbox(l_listbox_frame,
                                bg=bg,
                                font=("Franklin_Gothic_Medium", 20, "bold"),
                                fg=fg,
@@ -799,7 +927,7 @@ def open_trophies():
                                height=20,
                                selectmode=tk.SINGLE)
 
-        uncollected = tk.Listbox(trophies_frame,
+        uncollected = tk.Listbox(r_listbox_frame,
                                  bg=bg,
                                  font=("Franklin_Gothic_Medium", 20, "bold"),
                                  fg=fg,
@@ -817,8 +945,14 @@ def open_trophies():
 
         set_menus()
 
-        collected.grid(row=1, column=1)
-        uncollected.grid(row=1, column=3)
+        tk.Entry(l_listbox_frame, textvariable=l_search_query).grid(row=0)
+        tk.Entry(r_listbox_frame, textvariable=r_search_query).grid(row=0)
+
+        l_search_query.trace('w', lambda *args: l_search_update())
+        r_search_query.trace('w', lambda *args: r_search_update())
+
+        collected.grid(row=1)
+        uncollected.grid(row=1)
 
         fill_listboxes()
 

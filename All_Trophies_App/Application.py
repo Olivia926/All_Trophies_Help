@@ -14,7 +14,7 @@ game_window = AppGlobals.game_window
 
 def do_thing():
     """Temporary thing that will be deleted"""
-    print(f"HIHIHIHIHIHIHI")
+    print(f"Hi")
 
 
 def get_window_coords():
