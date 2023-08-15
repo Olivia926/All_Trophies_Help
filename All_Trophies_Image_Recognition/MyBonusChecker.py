@@ -13,7 +13,7 @@ stop = False
 click_positions = []
 all_words = set()
 global_index = 0
-fps = 8
+fps = 7
 
 
 def clear_bonuses():
@@ -204,8 +204,6 @@ def check_bonuses():
     global all_words
     global global_index
     threads = []
-
-    print(all_words)
 
     print("Please wait while we look at the bonuses")
     for word in all_words:
