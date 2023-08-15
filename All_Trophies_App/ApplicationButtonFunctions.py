@@ -662,7 +662,7 @@ def open_trophies():
         search_index = 0
         search_len = len(l_search)
 
-        index = 0
+        ind = 0
         listbox_len = int(collected.size())
 
         if s == '':
@@ -681,13 +681,13 @@ def open_trophies():
             else:
                 search_index += 1
 
-        while index < int(listbox_len):
-            if collected.get(index)[0:n].lower() != s:
-                l_search.append(collected.get(index))
-                collected.delete(index)
+        while ind < int(listbox_len):
+            if collected.get(ind)[0:n].lower() != s:
+                l_search.append(collected.get(ind))
+                collected.delete(ind)
                 listbox_len -= 1
             else:
-                index += 1
+                ind += 1
 
     def r_search_update():
         nonlocal r_search_query
@@ -700,8 +700,8 @@ def open_trophies():
         search_index = 0
         search_len = len(r_search)
 
-        index = 0
-        listbox_len = int(uncollected.size())
+        ind = 0
+        listbox_len = uncollected.size()
 
         if s == '':
             while len(r_search) > 0:
@@ -710,7 +710,7 @@ def open_trophies():
                 uncollected.insert(index, val)
             return
 
-        while search_index < int(search_len):
+        while search_index < search_len:
             if r_search[search_index][0:n].lower() == s:
                 index, _ = get_index(uncollected, r_search[search_index])
                 uncollected.insert(index, r_search[search_index])
@@ -719,13 +719,13 @@ def open_trophies():
             else:
                 search_index += 1
 
-        while index < int(listbox_len):
-            if uncollected.get(index)[0:n].lower() != s:
-                r_search.append(uncollected.get(index))
-                uncollected.delete(index)
+        while ind < listbox_len:
+            if uncollected.get(ind)[0:n].lower() != s:
+                r_search.append(uncollected.get(ind))
+                uncollected.delete(ind)
                 listbox_len -= 1
             else:
-                index += 1
+                ind += 1
 
     def move_left_trophies():
         nonlocal collected
