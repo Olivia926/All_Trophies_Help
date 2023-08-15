@@ -656,7 +656,7 @@ def open_trophies():
         nonlocal collected
         nonlocal l_search
 
-        s = r_search_query.get().lower()
+        s = l_search_query.get().lower()
         n = len(s)
 
         search_index = 0
