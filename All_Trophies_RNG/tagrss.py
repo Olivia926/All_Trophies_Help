@@ -22,6 +22,14 @@ of that linear function changes little as you change seed. With such combination
 eligible areas of seeds appear. The used combination co-efficients are listed as vectors in CONSTRICTS constant list.
 """
 
+TAGS = ['AAAA','1DER','2BIT','2L8','2PAY','401K','4BDN','4BY4','4EVA','7HVN','AOK','ARCH','ARN','ASH','BAST','BBBB','BCUZ','BETA','BOBO','BOMB','BONE','BOO','BORT',
+             'BOZO','BUB','BUD','BUZZ','BYRN','CHUM','COOP','CUBE','CUD','DAYZ','DIRT','DIVA','DNCR','DUCK','DUD','DUFF','DV8','ED','ELBO','FAMI','FIDO','FILO','FIRE',
+             'FLAV','FLEA','FLYN','GBA','GCN','GLUV','GR8','GRIT','GRRL','GUST','GUT','HAMB','HAND','HELA','HEYU','HI5','HIKU','HOOD','HYDE','IGGY','IKE','IMPA','JAZZ',
+             'JEKL','JOJO','JUNK','KEY','KILA','KITY','KLOB','KNEE','L33T','L8ER','LCD','LOKI','LULU','MAC','MAMA','ME','MILO','MIST','MOJO','MOSH','NADA','ZZZZ','NAVI',
+             'NELL','NEWT','NOOK','NEWB','ODIN','OLAF','OOPS','OPUS','PAPA','PIT','POP','PKMN','QTPI','RAM','RNDM','ROBN','ROT8','RUTO','SAMI','SET','SETI','SHIG','SK8R',
+             'SLIM','SMOK','SNES','SNTA','SPUD','STAR','THOR','THUG','TIRE','TLOZ','TNDO','TOAD','TOMM','UNO','VIVI','WALK','WART','WARZ','WITH','YETI','YNOT','ZAXO',
+             'ZETA','ZOD','ZOE','WORM','GEEK','DUDE','WYRN','BLOB']
+
 MAX_STAGES = 5
 
 CONSTMULTIP = [
@@ -341,7 +349,8 @@ def TagRss(sequence):
 
     :param sequence: List of 5 ints corresponding to sequence of ingame tags. The list length has to be exactly 5.
     :return: List of match lists. Each match list has 3 items; starting seed, list of tag ints generated from the
-    starting seed, and ending seed, the seed that the sequence ends on post tag generation.
+    starting seed, and list of ending seeds generated, the seeds that the sequences ends on post tag generation.
+    The ending seed list starts from seed after 5 tag generated, and goes up to seed after 10th tag.
     """
     hits = []
 
@@ -393,9 +402,16 @@ def validate_hits(sequence, hits):
 
     for seed in hits:
 
-        tag_list, post_seed = generate_tags(seed)
+        tag_list, post_seed = generate_tags(seed, 10)
         if list_eq(sequence, tag_list):
-            valids.append([seed, tag_list, post_seed])
+
+            duplicate_ending_found = False
+
+            for i in range(0, len(valids)):
+                duplicate_ending_found = duplicate_ending_found or list_eq(valids[i][2], post_seed)
+
+            if not duplicate_ending_found:
+                valids.append([seed, tag_list, post_seed])
 
     return valids
 
@@ -409,6 +425,7 @@ def generate_tags(seed, length=5):
     :return: tags: int list, s: ending seed after list generation.
     """
     s = next(seed)
+    end_list = []
     tags = [rand_int(s)]
 
     for num in range(1, length):
@@ -421,6 +438,11 @@ def generate_tags(seed, length=5):
             tag = rand_int(s)
             if tag not in tags[low_end: num]:
                 tags.append(tag)
+
                 not_appended = False
 
-    return tags, s
+        if num >= 4:
+            end_list.append(s)
+
+
+    return tags, end_list
