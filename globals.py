@@ -58,7 +58,7 @@ bonuses = [['Bird of Prey', 0], ['Combo King', 0], ['Juggler', 0], ['Backstabber
 trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack', 0, 0, 'Item'],
             ['Bucket', 0, 1, 'Item'], ['Capsule', 0, 1, 'Item'], ['Egg', 0, 1, 'Item'], ['Fan', 0, 1, 'Item'],
             ['Flipper', 0, 1, 'Item'], ['Home-Run Bat', 0, 1, 'Item'], ['Megavitamins', 0, 1, 'Item'],
-            ['Mr. Saturn', 0, 1, 'Item'],
+            ['Mr. Saturn', 0, 1, 'Item'], ['Star Rod', 0, 1, 'Item'],
             ['Poison Mushroom', 0, 1, 'Item'],
             ['Super Mushroom', 0, 1, 'Item'], ['Super Scope', 0, 1, 'Item'], ['Toad', 0, 1, 'Item'],
             ['Vegetable', 0, 0, 'Container'], ['Warp Star', 0, 0, 'Container'], ['Barrel', 0, 1, 'Container'],
@@ -68,8 +68,8 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Beam Sword', 0, 0, 'Paula BS'], ['Paula', 0, 0, 'Paula BS'], ['Charizard', 0, 0, 'Starzard'],
             ['Staryu', 0, 0, 'Starzard'], ['Chikorita', 0, 1, 'Starzard'], ['Crobat', 0, 1, 'Starzard'],
             ['Goldeen', 0, 1, 'Starzard'], ['Heracross', 0, 1, 'Starzard'], ['Poliwhirl', 0, 1, 'Starzard'],
-            ['Scizor', 0, 1, 'Starzard'], ['Snorlax', 0, 1, 'Starzard'], ['Chikorita', 0, 1, 'Starzard'],
-            ['Cleffa', 0, 0, 'Cletrodema'], ['Electrode', 0, 0, 'Cletrodema'], ['Marill', 0, 0, 'Cletrodema'],
+            ['Scizor', 0, 1, 'Starzard'], ['Snorlax', 0, 1, 'Starzard'], ['Cleffa', 0, 0, 'Cletrodema'],
+            ['Electrode', 0, 0, 'Cletrodema'], ['Marill', 0, 0, 'Cletrodema'],
             ['Bellossom', 0, 1, 'Cletrodema'], ['Blastoise', 0, 1, 'Cletrodema'], ['Bulbasaur', 0, 1, 'Cletrodema'],
             ['Clefairy', 0, 1, 'Cletrodema'], ['Cyndaquil', 0, 1, 'Cletrodema'], ['Igglybuff', 0, 1, 'Cletrodema'],
             ['Lugia', 0, 1, 'Cletrodema'], ['Porygon 2', 0, 1, 'Cletrodema'], ['Squirtle', 0, 1, 'Cletrodema'],
@@ -81,8 +81,13 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Koopa Troopa', 0, 1, 'Enemies'], ['Klap Trap', 0, 1, 'Enemies'], ['Thwomp', 0, 1, 'Enemies'],
             ['Topi', 0, 1, 'Enemies'], ['Pit', 0, 0, 'Wheels'], ['Annie', 0, 1, 'Wheels'],
             ['Donbe & Hikari', 0, 1, 'Wheels'], ['Excitebike', 0, 1, 'Wheels'], ['Monster', 0, 1, 'Wheels'],
-            ['Ryoto Hayami', 0, 1, 'Wheels'], ['ZERO-ONE', 0, 1, 'Wheels'], ['Peppy Hare', 0, 0, 'Characters'],
-            ['Plum', 0, 0, 'Characters'], ['Starman EB', 0, 1, 'Characters'], ['Lakitu', 0, 1, 'Characters'],
+            ['Ryoto Hayami', 0, 1, 'Wheels'], ['ZERO-ONE', 0, 1, 'Wheels'], ['Ayumi Tachibana', 0, 0, 'D Bucket'],
+            ['Love Giant', 0, 0, 'D Bucket'], ['Daisy', 0, 1, 'D Bucket'], ['Dr. Wright', 0, 1, 'D Bucket'],
+            ['Ducks', 0, 1, 'D Bucket'], ['Plum', 0, 0, 'Characters'], ['Lakitu', 0, 1, 'Characters'],
+
+            ['Peppy Hare', 0, 1, 'Characters'],
+
+            ['Starman EB', 0, 1, 'Characters'],
             ['Goron', 0, 0, 'Zelda'], ['Master Sword', 0, 0, 'Zelda'], ['Balloon Fighter', 0, 1, 'Zelda'],
             ['Kensuke Kimachi', 0, 1, 'Zelda'], ['Kirby Hat 3', 0, 1, 'Zelda'], ['Stanley', 0, 1, 'Zelda'],
             ['Like Like', 0, 0, 'Birdo'], ['ReDead', 0, 0, 'Birdo'], ['Birdo', 0, 1, 'Birdo'],
@@ -122,3 +127,4 @@ TAGS = ['AAAA', '1DER', '2BIT', '2L8', '2PAY', '401K', '4BDN', '4BY4', '4EVA', '
         'SETI', 'SHIG', 'SK8R', 'SLIM', 'SMOK', 'SNES', 'SNTA', 'SPUD', 'STAR', 'THOR', 'THUG', 'TIRE', 'TLOZ', 'TNDO',
         'TOAD', 'TOMM', 'UNO', 'VIVI', 'WALK', 'WART', 'WARZ', 'WITH', 'YETI', 'YNOT', 'ZAXO', 'ZETA', 'ZOD', 'ZOE',
         'WORM', 'GEEK', 'DUDE', 'WYRN', 'BLOB']
+

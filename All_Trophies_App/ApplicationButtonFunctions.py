@@ -405,6 +405,7 @@ def open_trophies():
         left_menu.menu.add_command(label='Wobbuffet', command=lambda: left_bucket("Wobbuffet"))
         left_menu.menu.add_command(label='Enemies', command=lambda: left_bucket("Enemies"))
         left_menu.menu.add_command(label='Wheels', command=lambda: left_bucket("Wheels"))
+        left_menu.menu.add_command(label='D Bucket', command=lambda: left_bucket("D Bucket"))
         left_menu.menu.add_command(label='Characters', command=lambda: left_bucket("Characters"))
         left_menu.menu.add_command(label='Zelda', command=lambda: left_bucket("Zelda"))
         left_menu.menu.add_command(label='Birdo', command=lambda: left_bucket("Birdo"))
@@ -428,6 +429,7 @@ def open_trophies():
         right_menu.menu.add_command(label='Wobbuffet', command=lambda: right_bucket("Wobbuffet"))
         right_menu.menu.add_command(label='Enemies', command=lambda: right_bucket("Enemies"))
         right_menu.menu.add_command(label='Wheels', command=lambda: right_bucket("Wheels"))
+        right_menu.menu.add_command(label='D Bucket', command=lambda: right_bucket("D Bucket"))
         right_menu.menu.add_command(label='Characters', command=lambda: right_bucket("Characters"))
         right_menu.menu.add_command(label='Zelda', command=lambda: right_bucket("Zelda"))
         right_menu.menu.add_command(label='Birdo', command=lambda: right_bucket("Birdo"))
@@ -487,6 +489,11 @@ def open_trophies():
                     tag_bool[identifier] = 1
                     check_finish()
                     return
+            elif len(text.get()) == 2:
+                if text.get() in tags:
+                    tag_bool[identifier] = 1
+                    check_finish()
+                    return
 
             if tag_bool[identifier]:
                 tag_bool[identifier] = 0
@@ -499,8 +506,21 @@ def open_trophies():
 
             return 1
 
-        def birdo_rng():
-            print("Birdo")
+        def birdo_rng(t):
+            from All_Trophies_RNG.initial_birdo import main
+            from globals import TAGS
+
+            rolled_tags = []
+            for tag in t:
+                print(TAGS.index(tag.get()))
+                rolled_tags.append(TAGS.index(tag.get()))
+
+            owned_trophies = []
+
+            for i in range(collected.size()):
+                owned_trophies.append(collected.get(i))
+
+            main(rolled_tags, owned_trophies)
 
         def adventure_rng():
             print("Adventure")
@@ -535,6 +555,8 @@ def open_trophies():
         text_4 = tk.StringVar()
         text_5 = tk.StringVar()
 
+        new_tags = [text_1, text_2, text_3, text_4, text_5]
+
         tk.Entry(text_frame, textvariable=text_1).grid(row=1, column=0)
         tk.Entry(text_frame, textvariable=text_2).grid(row=1, column=1)
         tk.Entry(text_frame, textvariable=text_3).grid(row=1, column=2)
@@ -548,12 +570,12 @@ def open_trophies():
         text_5.trace('w', lambda *args: text_settings(text_5, 4))
 
         if rng_type == 'birdo':
-            birdo = tk.Button(text_frame, text="Search For Birdo", font=['Times New Roman', 15, 'bold'],
-                              justify='center', command=birdo_rng)
+            birdo = tk.Button(text_frame, text="Birdo Search", font=['Times New Roman', 15, 'bold'],
+                              justify='center', command=lambda: birdo_rng(new_tags))
             birdo.config(state='disabled')
             birdo.grid(row=3, column=2)
         else:
-            adv = tk.Button(text_frame, text="Search For Adventure", font=['Times New Roman', 15, 'bold'],
+            adv = tk.Button(text_frame, text="Adventure Search", font=['Times New Roman', 15, 'bold'],
                             justify='center', command=adventure_rng)
             adv.config(state='disabled')
             adv.grid(row=3, column=2)

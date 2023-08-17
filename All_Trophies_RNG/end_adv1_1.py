@@ -1,24 +1,22 @@
 from tagrss import TagRss
+import globals
 
 # i really should figure out a better way to implement this 
 # instead of copy-pasting this for each new file
 rng = 0x00000001
 
-TAGS = ['AAAA','1DER','2BIT','2L8','2PAY','401K','4BDN','4BY4','4EVA','7HVN','AOK','ARCH','ARN','ASH','BAST','BBBB','BCUZ','BETA','BOBO','BOMB','BONE','BOO','BORT',
-             'BOZO','BUB','BUD','BUZZ','BYRN','CHUM','COOP','CUBE','CUD','DAYZ','DIRT','DIVA','DNCR','DUCK','DUD','DUFF','DV8','ED','ELBO','FAMI','FIDO','FILO','FIRE',
-             'FLAV','FLEA','FLYN','GBA','GCN','GLUV','GR8','GRIT','GRRL','GUST','GUT','HAMB','HAND','HELA','HEYU','HI5','HIKU','HOOD','HYDE','IGGY','IKE','IMPA','JAZZ',
-             'JEKL','JOJO','JUNK','KEY','KILA','KITY','KLOB','KNEE','L33T','L8ER','LCD','LOKI','LULU','MAC','MAMA','ME','MILO','MIST','MOJO','MOSH','NADA','ZZZZ','NAVI',
-             'NELL','NEWT','NOOK','NEWB','ODIN','OLAF','OOPS','OPUS','PAPA','PIT','POP','PKMN','QTPI','RAM','RNDM','ROBN','ROT8','RUTO','SAMI','SET','SETI','SHIG','SK8R',
-             'SLIM','SMOK','SNES','SNTA','SPUD','STAR','THOR','THUG','TIRE','TLOZ','TNDO','TOAD','TOMM','UNO','VIVI','WALK','WART','WARZ','WITH','YETI','YNOT','ZAXO',
-             'ZETA','ZOD','ZOE','WORM','GEEK','DUDE','WYRN','BLOB']
+TAGS = globals.TAGS
+
 
 def get_rng() -> int:
     global rng
     return rng
 
-def set_rng(val: int) -> None :
+
+def set_rng(val: int) -> None:
     global rng
     rng = val
+
 
 def next_rng(custom_rng_val: int = -1) -> int:
     if custom_rng_val == -1:
@@ -29,10 +27,12 @@ def next_rng(custom_rng_val: int = -1) -> int:
         ret = (214013*custom_rng_val + 2531011) & 4294967295
         return ret
 
-def get_rand_int(i: int, adv = True) -> int:
+
+def get_rand_int(i: int, adv=True) -> int:
     temp_rng = next_rng() if adv else get_rng()
     top_bits = temp_rng >> 16
     return (i*top_bits) >> 16
+
 
 def trophy_str(t: list[str, int, bool]) -> str:
     ret = f'- {t[0]} '
@@ -41,6 +41,7 @@ def trophy_str(t: list[str, int, bool]) -> str:
     else:
         ret += f' (new)|'
     return ret
+
 
 def check_buckets(trophy: str, buckets: list[list[str]], delete: bool = True) -> (list[list[str]], list[str]):
     rem = []
@@ -55,10 +56,11 @@ def check_buckets(trophy: str, buckets: list[list[str]], delete: bool = True) ->
                     rem = buckets[i]
                 return buckets, rem
 
+
 def input_trophies_owned(prompt: str = "Type the names of the trophies that you've collected in the gallery. Substrings are allowed, but be careful. Type 'x' or 'q' to finish.\n", 
-                       trophies: list[str] = None, 
-                       buckets: list[list[str]] = None
-                       ) -> (list[str], list[list[str]]):
+                         trophies: list[str] = None,
+                         buckets: list[list[str]] = None
+                         ) -> (list[str], list[list[str]]):
     
     input_trophy = input(prompt)
     if not input_trophy:
@@ -103,6 +105,7 @@ def input_trophies_owned(prompt: str = "Type the names of the trophies that you'
     
     return trophies, buckets
 
+
 def confirm_trophy(roll: int, trophies: list[str], buckets: list[list[str]]) -> (list[str], list[list[str]], bool):
     confirmed = not input(f"Confirm {trophies[roll].upper()} trophy? Hit [ENTER] if yes, otherwise input a character.\n")
     if confirmed:
@@ -110,6 +113,7 @@ def confirm_trophy(roll: int, trophies: list[str], buckets: list[list[str]]) -> 
         buckets, _ = check_buckets(trophies[roll], buckets=buckets)
         del trophies[roll]
     return trophies, buckets, confirmed
+
 
 def input_tag(rolled_tags: list[str]) -> list[int]:
     global TAGS
@@ -119,6 +123,7 @@ def input_tag(rolled_tags: list[str]) -> list[int]:
     else:
         print('Invalid tag, probably a typo')
     return rolled_tags
+
 
 def find_ideal_seed(trophies: list[str], temp_seed: int = -1, num_advances: int = 0) -> (int, int, int):
     trophy_stage_roll = -1
@@ -135,6 +140,7 @@ def find_ideal_seed(trophies: list[str], temp_seed: int = -1, num_advances: int 
             # We don't have to check for anything else here since we're assuming all other trophies except for the 1PO trophies are owned.
         temp_seed = (214013 * temp_seed + 2531011) & 4294967295
         num_advances += 1
+
 
 # this time we're going to have to figure out the order of the trophies for the 1PO+1PL list
 def main():
