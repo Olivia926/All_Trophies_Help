@@ -58,8 +58,8 @@ bonuses = [['Bird of Prey', 0], ['Combo King', 0], ['Juggler', 0], ['Backstabber
 trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack', 0, 0, 'Item'],
             ['Bucket', 0, 1, 'Item'], ['Capsule', 0, 1, 'Item'], ['Egg', 0, 1, 'Item'], ['Fan', 0, 1, 'Item'],
             ['Flipper', 0, 1, 'Item'], ['Home-Run Bat', 0, 1, 'Item'], ['Megavitamins', 0, 1, 'Item'],
-            ['Mr. Saturn', 0, 1, 'Item'], ['Star Rod', 0, 1, 'Item'],
-            ['Poison Mushroom', 0, 1, 'Item'],
+            ['Mr. Saturn', 0, 1, 'Item'],
+            ['Poison Mushroom', 0, 1, 'Item'], ['Star Rod', 0, 1, 'Item'],
             ['Super Mushroom', 0, 1, 'Item'], ['Super Scope', 0, 1, 'Item'], ['Toad', 0, 1, 'Item'],
             ['Vegetable', 0, 0, 'Container'], ['Warp Star', 0, 0, 'Container'], ['Barrel', 0, 1, 'Container'],
             ['Crate', 0, 1, 'Container'], ['Party Ball', 0, 1, 'Container'], ['Starman 64', 0, 1, 'Container'],
@@ -78,7 +78,7 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Baby Bowser', 0, 1, 'Kirby'], ['Ball Kirby', 0, 1, 'Kirby'], ['Metroid', 0, 1, 'Kirby'],
             ['Raphael Raven', 0, 1, 'Kirby'], ['Rick', 0, 1, 'Kirby'], ['Slippy Toad', 0, 1, 'Kirby'],
             ['Waddle Dee', 0, 1, 'Kirby'], ['Banzai Bill', 0, 0, 'Enemies'], ['Koopa Paratroopa', 0, 0, 'Enemies'],
-            ['Koopa Troopa', 0, 1, 'Enemies'], ['Klap Trap', 0, 1, 'Enemies'], ['Thwomp', 0, 1, 'Enemies'],
+            ['Klap Trap', 0, 1, 'Enemies'], ['Koopa Troopa', 0, 1, 'Enemies'], ['Thwomp', 0, 1, 'Enemies'],
             ['Topi', 0, 1, 'Enemies'], ['Pit', 0, 0, 'Wheels'], ['Annie', 0, 1, 'Wheels'],
             ['Donbe & Hikari', 0, 1, 'Wheels'], ['Excitebike', 0, 1, 'Wheels'], ['Monster', 0, 1, 'Wheels'],
             ['Ryoto Hayami', 0, 1, 'Wheels'], ['ZERO-ONE', 0, 1, 'Wheels'], ['Ayumi Tachibana', 0, 0, 'D Bucket'],
@@ -95,7 +95,7 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Octorok', 0, 0, 'Octorok'], ['Viruses', 0, 0, 'Sick'], ['Heririn', 0, 1, 'Sick'],
             ['Racing Kart', 0, 1, 'Sick'], ['Dr. Stewart', 0, 1, 'Hats'], ['Kirby Hat 1', 0, 1, 'Hats'],
             ['Kirby Hat 2', 0, 1, 'Hats'], ['Metal Mario', 0, 1, 'Hats'], ['Andross', 0, 1, 'Villains'],
-            ['Andross 64', 0, 1, 'Villains'], ['Jody Summer', 0, 1, 'Villains'], ['Meta Knight', 0, 1, 'Villains'],
+            ['Andross 64', 0, 1, 'Villains'], ['Jody Summer', 0, 1, 'Villains'], ['Meta-Knight', 0, 1, 'Villains'],
             ['Poo', 0, 1, 'Villains'], ['Ridley', 0, 1, 'Villains'], ['Samurai Goroh', 0, 1, 'Villains'],
             ['Vacuum Luigi', 0, 1, 'Vacuum Luigi'], ['Totakeke', 0, 1, 'Dog'], ['Alpha', 0, 2, 'Lotto'],
             ['Articuno', 0, 2, 'Lotto'], ['Arwing', 0, 2, 'Lotto'], ['Baby Mario', 0, 2, 'Lotto'],
@@ -117,7 +117,7 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Zapdos', 0, 2, 'Lotto']]
 
 TAGS = ['AAAA', '1DER', '2BIT', '2L8', '2PAY', '401K', '4BDN', '4BY4', '4EVA', '7HVN', 'AOK', 'ARCH', 'ARN', 'ASH',
-        'BAST', 'BBBB', 'BCUZ', 'BETA', 'BOBO', 'BOMB', 'BONE', 'BOO', 'BORT', 'BOZO', 'BUB', 'BUD', 'BUZZ', 'BURN',
+        'BAST', 'BBBB', 'BCUZ', 'BETA', 'BOBO', 'BOMB', 'BONE', 'BOO', 'BORT', 'BOZO', 'BUB', 'BUD', 'BUZZ', 'BYRN',
         'CHUM', 'COOP', 'CUBE', 'CUD', 'DAYZ', 'DIRT', 'DIVA', 'DNCR', 'DUCK', 'DUD', 'DUFF', 'DV8', 'ED', 'ELBO',
         'FAMI', 'FIDO', 'FILO', 'FIRE', 'FLAV', 'FLEA', 'FLYN', 'GBA', 'GCN', 'GLUV', 'GR8', 'GRIT', 'GRRL', 'GUST',
         'GUT', 'HAMB', 'HAND', 'HELA', 'HEYU', 'HI5', 'HIKU', 'HOOD', 'HYDE', 'IGGY', 'IKE', 'IMPA', 'JAZZ', 'JEKL',
@@ -127,4 +127,3 @@ TAGS = ['AAAA', '1DER', '2BIT', '2L8', '2PAY', '401K', '4BDN', '4BY4', '4EVA', '
         'SETI', 'SHIG', 'SK8R', 'SLIM', 'SMOK', 'SNES', 'SNTA', 'SPUD', 'STAR', 'THOR', 'THUG', 'TIRE', 'TLOZ', 'TNDO',
         'TOAD', 'TOMM', 'UNO', 'VIVI', 'WALK', 'WART', 'WARZ', 'WITH', 'YETI', 'YNOT', 'ZAXO', 'ZETA', 'ZOD', 'ZOE',
         'WORM', 'GEEK', 'DUDE', 'WYRN', 'BLOB']
-

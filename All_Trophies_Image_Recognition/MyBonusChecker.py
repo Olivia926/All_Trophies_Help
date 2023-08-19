@@ -205,7 +205,6 @@ def check_bonuses():
     global global_index
     threads = []
 
-    print("Please wait while we look at the bonuses")
     for word in all_words:
         t = threading.Thread(target=start_thread, args=[global_index, word])
         t.start()
