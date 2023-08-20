@@ -22,12 +22,31 @@ def fin_adv():
     new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
     center(new_window)
 
+    def on_closing(win):
+        new_window.destroy()
+
+    def submit():
+        new_window.destroy()
+
+    frame = tk.Frame(new_window)
+
+    tk.Label(frame, text="You collected every trophy!\n\n",
+             font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
+
+
+    tk.Button(frame, text="Exit", command=submit).pack(side='bottom')
+
+    frame.pack()
+
+    new_window.wait_window()
+
 
 def display_adv(tags, trophy, goomba_trophies):
     trophies = globals.trophies
     file = "../Images/Image_Atlas.png"
     photo = Image.open(file)
     confirmed = [0]
+    close = False
 
     def change_state(ind, txt):
         nonlocal confirmed
@@ -41,6 +60,12 @@ def display_adv(tags, trophy, goomba_trophies):
 
     def submit():
         new_window.destroy()
+
+    def on_closing(win):
+        nonlocal close
+
+        close = True
+        win.destroy()
 
     new_window = tk.Toplevel(window)
     new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
@@ -105,9 +130,10 @@ def display_adv(tags, trophy, goomba_trophies):
                 im_2 = ImageTk.PhotoImage(cropped_im)
                 text_goomba.image_create(tk.END, image=im_2)
                 text_goomba.image = im_2
+                confirmed.append(0)
                 break
 
-        text_goomba.bind("<Button-1>", lambda *args: change_state(0, text_goomba))
+        text_goomba.bind("<Button-1>", lambda *args: change_state(1, text_goomba))
     elif len(goomba_trophies) == 2:
         frame_2 = tk.Frame(trophy_frame, width=250, height=300)
         frame_2.grid(row=0, column=1)
@@ -131,6 +157,7 @@ def display_adv(tags, trophy, goomba_trophies):
                 text_goomba_1.image_create(tk.END, image=im_2)
                 text_goomba_1.image = im_2
                 num += 1
+                confirmed.append(0)
                 if num == 2:
                     break
 
@@ -141,11 +168,12 @@ def display_adv(tags, trophy, goomba_trophies):
                 text_goomba_2.image_create(tk.END, image=im_3)
                 text_goomba_2.image = im_3
                 num += 1
+                confirmed.append(0)
                 if num == 2:
                     break
 
-        text_goomba_1.bind("<Button-1>", lambda *args: change_state(0, text_goomba_1))
-        text_goomba_2.bind("<Button-1>", lambda *args: change_state(0, text_goomba_2))
+        text_goomba_1.bind("<Button-1>", lambda *args: change_state(1, text_goomba_1))
+        text_goomba_2.bind("<Button-1>", lambda *args: change_state(2, text_goomba_2))
 
     tk.Button(new_window, text="Submit", font=['Times New Roman', 15, 'bold'],
               justify='center', command=submit).pack(side='bottom')
@@ -155,6 +183,9 @@ def display_adv(tags, trophy, goomba_trophies):
     trophy_frame.pack(side='bottom')
 
     new_window.wait_window()
+
+    if close:
+        return [], close
 
     results = []
     for i in range(len(confirmed)):
@@ -168,18 +199,20 @@ def display_adv(tags, trophy, goomba_trophies):
             if confirmed[2]:
                 results.append(goomba_trophies[1])
 
-    return results
-
-
-def on_closing(new_window):
-    enable_children(window)
-    new_window.destroy()
+    return results, close
 
 
 def roll_more_tags(n):
     tags = globals.TAGS
     tag_bool = []
     svar = []
+    close = False
+
+    def on_closing(win):
+        nonlocal close
+
+        close = True
+        win.destroy()
 
     new_window = tk.Toplevel(window)
     new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
@@ -261,6 +294,9 @@ def roll_more_tags(n):
 
     new_window.wait_window()
 
+    if close:
+        return [], close
+
     if n == 1:
         return tags.index(svar[0].get())
 
@@ -268,7 +304,7 @@ def roll_more_tags(n):
     for tag in svar:
         rolled_tags.append(tags.index(tag.get()))
 
-    return rolled_tags
+    return rolled_tags, close
 
 
 def center(win):
@@ -716,13 +752,23 @@ def open_trophies():
 
     def start_adv():
         from All_Trophies_RNG.end_adv1_1 import main
+        from globals import trophies
         nonlocal collected
+
+        disable_children(window)
 
         owned_trophies = []
         for i in range(collected.size()):
             owned_trophies.append(collected.get(i))
 
-        main(owned_trophies)
+        confirmed = main(owned_trophies)
+
+        enable_children(window)
+
+        for trophy in confirmed:
+            index, trophies_index = get_index(collected, trophy)
+            uncollected.insert(index, trophy)
+            trophies[trophies_index][1] = 1
 
     def fill_listboxes():
         """

@@ -166,7 +166,9 @@ def main(owned_trophies):
                ['Staryu', 'Charizard'], ['Like Like', 'ReDead'], ['Four Giants'], ['Plum'],
                ['Cleffa', 'Electrode', 'Marill'], ['Fire Kirby'], ['Banzai Bill', 'Koopa Paratroopa'],
                ['Green Shell'], ['Pit'], ['Vegetable', 'Warp Star'], ['Viruses'], ['Octorok'],
-               ['Goron', 'Naster Sword']]
+               ['Goron', 'Master Sword']]
+
+    confirmed_trophies = []
     # Get the trophies owned from the gallery
     # trophies, buckets = input_trophies_owned(trophies=trophies, buckets=buckets)
 
@@ -176,7 +178,11 @@ def main(owned_trophies):
 
     # stage_trophy_spawn_locations = ['first wall', 'low wall', 'on top of the bricks', 'pipe before cliff']
     while len(trophies) > 0:
-        rolled_tags = roll_more_tags(5)
+        rolled_tags, break_flag = roll_more_tags(5)
+
+        if break_flag:
+            break
+
         # tagRSS
         potential_seed = TagRss(rolled_tags)
         
@@ -185,7 +191,13 @@ def main(owned_trophies):
         while len(potential_seed) > 1:
             # print(f"There are {len(potential_seed)} potential seeds, please keep rolling tags as prompted.")
             # rolled_tags = input_tag(rolled_tags=rolled_tags)
-            rolled_tags.append(roll_more_tags(1))
+
+            tag, break_flag = roll_more_tags(1)
+
+            if break_flag:
+                break
+
+            rolled_tags.append(tag)
 
             bad_seeds = []
             # since we're iterating through the list, I don't think we can remove the bad seed from the list,
@@ -227,48 +239,31 @@ def main(owned_trophies):
         
         # At this point, we are certain that 1) we know what our current seed is, and 2) we can manipulate the seed
         # to get a desired outcome.
-        """
-        if len(tags_to_roll) == 0:
-            print("No rolls are necessary")
-        else:
-            # print the last 5 tags to roll, cuz too many tags will clutter the prompt
-            print(f'You need to roll {len(tags_to_roll)} tags')
-            num_tags_to_print = min(5, len(tags_to_roll))
-            for tags in tags_to_roll[-1*num_tags_to_print:]:
-                print(tags)
-        """
         trophy_name = trophies[trophy_stage_roll]
-        print(f'Trophy from 1-1: {trophy_name.upper()}')
+
         # need to check if goomba trophy is desirable or dupe
         _, rem = check_buckets(trophy=trophy_name, buckets=buckets, delete=False)
+
         goomba_trophies = []
         if len(rem) > 1:
-            print(f"Goomba trophies:")
-            i = 1
             for t in rem:
                 if t != trophy_name:
                     goomba_trophies.append(t)
-                    print(f'\t{i}: {t.upper()}')
 
-        to_del = display_adv(tags_to_roll, trophy_name, goomba_trophies)
+        to_del, break_flag = display_adv(tags_to_roll, trophy_name, goomba_trophies)
+
+        if break_flag:
+            break
 
         while len(to_del) > 0:
-            trophies.remove(to_del.pop())
+            var = to_del.pop()
+            trophies.remove(var)
+            confirmed_trophies.append(var)
 
-        """
-        # confirm stage trophy was collected
-        trophies, buckets, _ = confirm_trophy(roll=trophy_stage_roll, trophies=trophies, buckets=buckets)
-        # there can only be up to 2 goomba trophies for any given trophy, according to buckets
-        # if there's only 1 goomba trophy, then just confirm if the player picked it up.
-        if len(goomba_trophies) == 1:
-            trophies, buckets, _ = confirm_trophy(roll=trophies.index(goomba_trophies[1]), trophies=trophies,
-                                                  buckets=buckets)
-        else:
-            goomba_trophy = input(f"Which goomba trophy did you collect? Press [ENTER] if neither.\n\t[1] "
-                                  f"{goomba_trophies[1].upper()}\n\t[2] {goomba_trophies[2].upper()}")
-            if int(goomba_trophy) == 1 or int(goomba_trophy) == 2:
-                trophies, buckets, _ = confirm_trophy(roll=trophies.index(goomba_trophies[int(goomba_trophy)]),
-                                                      trophies=trophies, buckets=buckets)
-        """
+        if break_flag:
+            break
 
-    fin_adv()
+    if len(trophies) == 0:
+        fin_adv()
+
+    return confirmed_trophies
