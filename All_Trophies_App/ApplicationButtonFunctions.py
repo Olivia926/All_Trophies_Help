@@ -1,6 +1,7 @@
 import globals
 import AppGlobals
 import tkinter as tk
+from tkinter import ttk
 import threading
 from PIL import Image, ImageTk
 
@@ -23,7 +24,7 @@ def fin_adv():
     center(new_window)
 
     def on_closing(win):
-        new_window.destroy()
+        win.destroy()
 
     def submit():
         new_window.destroy()
@@ -32,7 +33,6 @@ def fin_adv():
 
     tk.Label(frame, text="You collected every trophy!\n\n",
              font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
-
 
     tk.Button(frame, text="Exit", command=submit).pack(side='bottom')
 
@@ -567,6 +567,9 @@ def open_bonuses():
         schedule_check()
 
     if not booleans[0]:
+        bg = "#100817"
+        fg = "#ffffff"
+
         middle = tk.Frame(bonuses_frame)
 
         move_un = tk.Listbox(middle,
@@ -582,17 +585,17 @@ def open_bonuses():
                               selectmode=tk.SINGLE)
 
         collected = tk.Listbox(bonuses_frame,
-                               bg="#100817",
+                               bg=bg,
                                font=("Franklin_Gothic_Medium", 20, "bold"),
-                               fg="#ffffff",
+                               fg=fg,
                                justify='right',
                                height=20,
                                selectmode=tk.SINGLE)
 
         uncollected = tk.Listbox(bonuses_frame,
-                                 bg="#100817",
+                                 bg=bg,
                                  font=("Franklin_Gothic_Medium", 20, "bold"),
-                                 fg="#ffffff",
+                                 fg=fg,
                                  justify='right',
                                  height=20,
                                  selectmode=tk.SINGLE)
@@ -661,11 +664,6 @@ def open_trophies():
 
     r_buc = "All"
     l_buc = "All"
-
-    def enable_all():
-        enable_children(window)
-        fill_listboxes()
-        open_trophies()
 
     def set_menus():
         tk.Label(left_frame,
@@ -1159,6 +1157,11 @@ def open_trophies():
 def adjust_bonuses():
     global cur
 
-    if cur != 2:
-        hide_cur()
-        cur = 2
+    if not booleans[2]:
+        bg = "#100817"
+        fg = "#ffffff"
+
+        booleans[2] = 2
+
+    hide_cur()
+    cur = 2

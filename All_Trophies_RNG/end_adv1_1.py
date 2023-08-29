@@ -34,15 +34,6 @@ def get_rand_int(i: int, adv=True) -> int:
     return (i*top_bits) >> 16
 
 
-def trophy_str(t: list[str, int, bool]) -> str:
-    ret = f'- {t[0]} '
-    if t[1] == 0:
-        ret += f' (owned)|'
-    else:
-        ret += f' (new)|'
-    return ret
-
-
 def check_buckets(trophy: str, buckets: list[list[str]], delete: bool = True) -> (list[list[str]], list[str]):
     rem = []
     for i, b in enumerate(buckets):
@@ -57,82 +48,7 @@ def check_buckets(trophy: str, buckets: list[list[str]], delete: bool = True) ->
                 return buckets, rem
 
 
-"""
-def input_trophies_owned(prompt: str = "Type the names of the trophies that you've collected in the gallery. "
-                                       "Substrings are allowed, but be careful. Type 'x' or 'q' to finish.\n",
-                         trophies: list[str] = None,
-                         buckets: list[list[str]] = None
-                         ) -> (list[str], list[list[str]]):
-    
-    input_trophy = input(prompt)
-    if not input_trophy:
-        return trophies
-    while input_trophy.lower() != 'x' and input_trophy.lower() != 'q':
-        confirmed = False
-        misinput = False
-        multiple_trophies = ''
-        substr_matches = False
-        
-        for i, t in enumerate(trophies):
-            exact_match = False
-            
-            if input_trophy in t:
-                exact_match = input_trophy == t
-                if not exact_match:
-                    multiple_trophies += trophy_str(t)
-                    # Check if there are other trophies with the same substring.
-                    for t_forward in trophies[i+1:]:
-                        if input_trophy in t_forward:
-                            exact_match = input_trophy == t_forward
-                            multiple_trophies += trophy_str(t_forward)
-                            substr_matches = True
-                    # If so, then do not proceed; break immediately and reprompt.
-                    if not exact_match and substr_matches:
-                        multiple_trophies = multiple_trophies[:-1].replace("|", "\n")
-                        print(f"These trophies contain the substring '{input_trophy}':\n{multiple_trophies}"
-                              f"\nPlease retype the trophy name.")
-                        break
-                    if exact_match:
-                        continue
-                trophies, buckets, confirmed = confirm_trophy(roll=i, trophies=trophies, buckets=buckets)
-                if confirmed:
-                    break
-                else:
-                    misinput = True
-        else:
-            if not confirmed:
-                print(f'Did not collect {input_trophy}.')
-            elif misinput:
-                print(f'User misinput detected, please re-input the trophy you received.')
-        input_trophy = input("Trophy name (x or q to quit):\n")
-    
-    return trophies, buckets
-"""
-
-
-def confirm_trophy(roll: int, trophies: list[str], buckets: list[list[str]]) -> (list[str], list[list[str]], bool):
-    confirmed = not input(f"Confirm {trophies[roll].upper()} trophy? Hit [ENTER] if yes, otherwise input a character."
-                          f"\n")
-    if confirmed:
-        print(f"Confirmed that you received {trophies[roll]}.")
-        buckets, _ = check_buckets(trophies[roll], buckets=buckets)
-        del trophies[roll]
-    return trophies, buckets, confirmed
-
-
-def input_tag(rolled_tags: list[str]) -> list[int]:
-    global TAGS
-    new_tag = input(f"tag #{len(rolled_tags) + 1}: ")
-    if new_tag.upper() in TAGS:
-        rolled_tags.append(TAGS.index(new_tag.upper()))
-    else:
-        print('Invalid tag, probably a typo')
-    return rolled_tags
-
-
 def find_ideal_seed(trophies: list[str], temp_seed: int = -1, num_advances: int = 0) -> (int, int, int):
-    trophy_stage_roll = -1
-    # position_roll = -1
     while True:
         # Advance seed for success/failure roll, and check that it passes (the return value is `< 60`.)
         # 24 advances plus 1 from `get_rand_int(100)`.
@@ -188,29 +104,35 @@ def main(owned_trophies):
         
         # if more than one seed, then instruct user to roll more tags (in the future, OCR should be able to grab
         # all the tags for us)
-        while len(potential_seed) > 1:
-            # print(f"There are {len(potential_seed)} potential seeds, please keep rolling tags as prompted.")
-            # rolled_tags = input_tag(rolled_tags=rolled_tags)
+        while len(potential_seed) != 1:
+            if len(potential_seed) == 0:
+                rolled_tags, break_flag = roll_more_tags(5)
 
-            tag, break_flag = roll_more_tags(1)
+                if break_flag:
+                    break
+            else:
+                tag, break_flag = roll_more_tags(1)
 
-            if break_flag:
-                break
+                if break_flag:
+                    break
 
-            rolled_tags.append(tag)
+                rolled_tags.append(tag)
 
-            bad_seeds = []
-            # since we're iterating through the list, I don't think we can remove the bad seed from the list,
-            # so we keep a list of the bad seeds and remove them later.
-            for i, seed in enumerate(potential_seed):
-                if seed[1][len(rolled_tags) - 1] != rolled_tags[-1]:
-                    # insert at the beginning of the list, so we don't have to reverse the list when deleting
-                    # (deleting from the end will prevent deleting wrong indexes.)
-                    bad_seeds.insert(0, i)
-            
-            for b in bad_seeds:
-                del potential_seed[b]
-        
+                bad_seeds = []
+                # since we're iterating through the list, I don't think we can remove the bad seed from the list,
+                # so we keep a list of the bad seeds and remove them later.
+                for i, seed in enumerate(potential_seed):
+                    if seed[1][len(rolled_tags) - 1] != rolled_tags[-1]:
+                        # insert at the beginning of the list, so we don't have to reverse the list when deleting
+                        # (deleting from the end will prevent deleting wrong indexes.)
+                        bad_seeds.insert(0, i)
+
+                for b in bad_seeds:
+                    del potential_seed[b]
+
+        if break_flag:
+            break
+
         # At this point, we've figured out what the seed is.
         # Now we want to find an ideal seed.
         # print('Found the current seed, calculating ideal seed...')
