@@ -1,4 +1,5 @@
-from All_Trophies_RNG.tagrss import TagRss
+from globals import TAGS
+from All_Trophies_RNG.tagrss import *
 
 # no readme for this atm, so ill explain everything in this file
 # this assumes that you start on a fresh save of the game; no trophies owned besides the one you start with
@@ -12,16 +13,18 @@ from All_Trophies_RNG.tagrss import TagRss
 #     roll the number of times it says (it will print the tags to help you along the way)
 # 4b: if you don't get lucky, the program will explain why and tell you to reset the run and also reset the script.
 # if you have any other questions, please let me know!
-# I am also thinking about putting all of this in a big fat loop so that this script doesn't have to be restarted, but will hold off for now unless if someone really wants it!
+# I am also thinking about putting all of this in a big fat loop so that this script doesn't have to be restarted,
+# but will hold off for now unless if someone really wants it!
 
 rng = 0x00000001
+
 
 def get_rng() -> int:
     global rng
     return rng
 
 
-def set_rng(val: int) -> None :
+def set_rng(val: int) -> None:
     global rng
     rng = val
 
@@ -36,7 +39,7 @@ def next_rng(custom_rng_val: int = -1) -> int:
         return ret
 
 
-def get_rand_int(i: int, adv = True) -> int:
+def get_rand_int(i: int, adv=True) -> int:
     temp_rng = next_rng() if adv else get_rng()
     top_bits = temp_rng >> 16
     return (i*top_bits) >> 16
@@ -52,7 +55,7 @@ def trophy_str(t: list[str, int, bool]) -> str:
   
 
 # returns num_advances, coins_to_spend, and seed
-def find_ideal_seed(seed: int, birdo_index: int, num_advances: int = 0)-> (int, int, int):
+def find_ideal_seed(seed: int, birdo_index: int, num_advances: int = 0) -> (int, int, int):
     temp_rng = (214013*seed + 2531011) & 4294967295
     
     while True:
@@ -69,7 +72,7 @@ def find_ideal_seed(seed: int, birdo_index: int, num_advances: int = 0)-> (int, 
                 if ((83 * (temp_roll_rng >> 16)) >> 16) == birdo_index:
                     return num_advances, i, seed
         else:
-            # if we get thru the for-loop and dont find birdo then add to the number of advances
+            # if we get through the for-loop and don't find birdo then add to the number of advances
             num_advances += 1
             if num_advances > 1000:
                 print('this seed requires over 1000 steps; just reset and try again :(')
@@ -83,9 +86,13 @@ def find_ideal_seed(seed: int, birdo_index: int, num_advances: int = 0)-> (int, 
             coeff = coeff - const
             temp_rng = (coeff * seed + const) & 4294967295
 
-def main(rolled_tags, owned_trophies):
+
+def main(owned_trophies):
+    global TAGS
+    from All_Trophies_App.ApplicationButtonFunctions import roll_more_tags, display_birdo
+
     # Initial trophy list: [trophy_name]
-     trophies = {'Ray Gun', 'Super Scope', 'Fire Flower', 'Star Rod', 'Home-Run Bat', 'Fan', 'Red Shell', 'Flipper',
+    trophies = {'Ray Gun', 'Super Scope', 'Fire Flower', 'Star Rod', 'Home-Run Bat', 'Fan', 'Red Shell', 'Flipper',
                 'Mr. Saturn', 'Bob-omb', 'Super Mushroom', 'Starman 64', 'Barrel Cannon', 'Party Ball', 'Crate',
                 'Barrel', 'Capsule', 'Egg', 'Squirtle', 'Blastoise', 'Clefairy', 'Weezing', 'Chansey', 'Goldeen',
                 'Snorlax', 'Chikorita', 'Cyndaquil', 'Bellossom', 'Wobbuffet', 'Scizor', 'Porygon 2', 'Toad', 'Coin',
@@ -97,55 +104,48 @@ def main(rolled_tags, owned_trophies):
         if trophy in trophies:
             birdo_index = 36
             break
-
-    potential_seed = TagRss(rolled_tags)
     
-    # tagRSS time
-    TAGS = ['AAAA','1DER','2BIT','2L8','2PAY','401K','4BDN','4BY4','4EVA','7HVN','AOK','ARCH','ARN','ASH','BAST','BBBB','BCUZ','BETA','BOBO','BOMB','BONE','BOO','BORT',
-             'BOZO','BUB','BUD','BUZZ','BYRN','CHUM','COOP','CUBE','CUD','DAYZ','DIRT','DIVA','DNCR','DUCK','DUD','DUFF','DV8','ED','ELBO','FAMI','FIDO','FILO','FIRE',
-             'FLAV','FLEA','FLYN','GBA','GCN','GLUV','GR8','GRIT','GRRL','GUST','GUT','HAMB','HAND','HELA','HEYU','HI5','HIKU','HOOD','HYDE','IGGY','IKE','IMPA','JAZZ',
-             'JEKL','JOJO','JUNK','KEY','KILA','KITY','KLOB','KNEE','L33T','L8ER','LCD','LOKI','LULU','MAC','MAMA','ME','MILO','MIST','MOJO','MOSH','NADA','ZZZZ','NAVI',
-             'NELL','NEWT','NOOK','NEWB','ODIN','OLAF','OOPS','OPUS','PAPA','PIT','POP','PKMN','QTPI','RAM','RNDM','ROBN','ROT8','RUTO','SAMI','SET','SETI','SHIG','SK8R',
-             'SLIM','SMOK','SNES','SNTA','SPUD','STAR','THOR','THUG','TIRE','TLOZ','TNDO','TOAD','TOMM','UNO','VIVI','WALK','WART','WARZ','WITH','YETI','YNOT','ZAXO',
-             'ZETA','ZOD','ZOE','WORM','GEEK','DUDE','WYRN','BLOB']
-    
-    rolled_tags = []
+    rolled_tags, break_flag = roll_more_tags(5)
     # let the user input each of the rolled tags
-    while len(rolled_tags) != 5:
-        rolled_tags = input_tag(rolled_tags=rolled_tags)
     potential_seed = TagRss(rolled_tags)
     
-    # now `rolled_tags` should contain the list of trophies
-    potential_seed = TagRss(rolled_tags)
-    
-    # if more than one seed, then instruct user to roll more tags (in the future, OCR should be able to grab all the tags for us)
-    while len(potential_seed) > 1:
-        print(f"There are {len(potential_seed)} potential seeds, please keep rolling tags as prompted.")
-        rolled_tags = input_tag(rolled_tags=rolled_tags)
+    # if more than one seed, then instruct user to roll more tags (in the future,
+    # OCR should be able to grab all the tags for us)
+    while len(potential_seed) != 1:
+        if len(potential_seed) == 0:
+            rolled_tags = roll_more_tags(5)
+        else:
+            rolled_tags.append(roll_more_tags(1))
         
-        bad_seeds = []
-        # since we're iterating through the list, i don't think we can remove the bad seed from the list, so we keep a list of the bad seeds and remove them later.
-        for i, seed in enumerate(potential_seed):
-            if seed[1][len(rolled_tags) - 1] != rolled_tags[-1]:
-                # insert at the beginning of the list so we don't have to reverse the list when deleting (deleting from the end will prevent deleting wrong indexes.)
-                bad_seeds.insert(0, i)
+            bad_seeds = []
+            # since we're iterating through the list, I don't think we can remove the bad seed from the list,
+            # so we keep a list of the bad seeds and remove them later.
+            for i, seed in enumerate(potential_seed):
+                if seed[1][len(rolled_tags) - 1] != rolled_tags[-1]:
+                    # insert at the beginning of the list, so we don't have to reverse the list when deleting
+                    # (deleting from the end will prevent deleting wrong indexes.)
+                    bad_seeds.insert(0, i)
         
-        for b in bad_seeds:
-            del potential_seed[b]
+            for b in bad_seeds:
+                del potential_seed[b]
     
     # if there's only one seed, then we can move on ahead
     # run a lotto sim to figure out if we can get birdo in the first 5 coins
-    # if it's not possible, then advance seed by 1 until we find a possible seed, and manip via generating tags (and maybe css in the future?)
+    # if it's not possible, then advance seed by 1 until we find a possible seed,
+    # and manip via generating tags (and maybe css in the future?)
     seed = potential_seed[0][2][len(rolled_tags) - 5]
     num_advances, coins_to_spend, seed = find_ideal_seed(seed=seed, birdo_index=birdo_index)
     
-    # bring back the rng value back to the seed so we can figure out if we can get to the desired seed (via the `num_advances`)
+    # bring back the rng value back to the seed, so we can figure out if we can get to the desired seed
+    # (via the `num_advances`)
     set_rng(seed)
     
     # at this point we now know how many times to advance and how many coins to spend in the lotto.
     # we just have to tell the user how to advance the seed to the desired seed, using `num_advances`.
     # this means that we need to simulate tagRSS to get to the desired seed, if possible.
     num_advances -= 1
+    tags_to_roll = []
+
     while num_advances != 0:
         tags_to_roll = []
         temp_num_advances = num_advances
@@ -162,14 +162,7 @@ def main(rolled_tags, owned_trophies):
         
         # automatically begin looking for an ideal seed if we can't manipulate the RNG to be the correct value
         if num_advances != 0:
-            num_advances, coins_to_spend, seed = find_ideal_seed(seed=seed, birdo_index=birdo_index, num_advances=temp_num_advances)
-    
-    if len(tags_to_roll) == 0:
-        print("No rolls are necessary")
-    else:
-        # print the last 5 tags to roll, cuz too many tags will clutter the prompt
-        print(f'You need to roll {len(tags_to_roll)} tags')
-        num_tags_to_print = min(5, len(tags_to_roll))
-        for tags in tags_to_roll[-1*num_tags_to_print:]:
-            print(tags)
-    print(f'Coins to spend in lotto: {coins_to_spend}')
+            num_advances, coins_to_spend, seed = find_ideal_seed(seed=seed, birdo_index=birdo_index,
+                                                                 num_advances=temp_num_advances)
+
+    return display_birdo(tags_to_roll, coins_to_spend, len(tags_to_roll))

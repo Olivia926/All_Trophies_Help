@@ -17,28 +17,93 @@ bonus_org_frame = tk.Frame(window)
 booleans = [0, 0, 0]
 
 
-def fin_adv():
-    new_window = tk.Toplevel(window)
-    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
-    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
-    center(new_window)
-
-    def on_closing(win):
-        win.destroy()
+def display_birdo(tags, num_coins, num_steps):
+    index = 94
+    file = "../Images/Image_Atlas.png"
+    photo = Image.open(file)
+    close = False
+    confirmed = 0
 
     def submit():
         new_window.destroy()
 
-    frame = tk.Frame(new_window)
+    def submit_confirm():
+        nonlocal confirmed
 
-    tk.Label(frame, text="You collected every trophy!\n\n",
-             font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
+        confirmed = 1
+        new_window.destroy()
 
-    tk.Button(frame, text="Exit", command=submit).pack(side='bottom')
+    def on_closing(win):
+        nonlocal close
 
-    frame.pack()
+        close = True
+        win.destroy()
+
+    def change_text():
+        nonlocal num_steps
+        if num_steps > 0:
+            num_steps -= 1
+        add_text()
+
+    def add_text():
+        nonlocal label
+
+        if len(tags) == 0:
+            text = 'Do not roll more tags!\n'
+        elif len(tags) <= 5:
+            text = f'Roll {num_steps} more tags!\nThe order of tags will be:\n'
+            for i in range(len(tags)):
+                if i != len(tags) - 1:
+                    text = f'{text}{tags[i]}, '
+                else:
+                    text = f'{text}{tags[i]}'
+        else:
+            text = f'Roll {num_steps} more tags!\nThe final 5 tags will be:\n'
+            for i in range(len(tags) - 5, len(tags), 1):
+                if i != len(tags) - 1:
+                    text = f'{text}{tags[i]}, '
+                else:
+                    text = f'{text}{tags[i]}'
+
+        label.config(text=f'{text}\nPress "Space" to decrease count!\n'
+                          f'When you have made it to the end, '
+                          f'go to the lottery and spend {num_coins} coins!\n')
+
+    new_window = tk.Toplevel(window)
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 7 / 11)}")
+    center(new_window)
+
+    text_frame = tk.Frame(new_window)
+    trophy_frame = tk.Frame(new_window, width=250, height=300)
+    button_frame = tk.Frame(new_window)
+
+    label = tk.Label(text_frame, text="",
+                     font=['Times New Roman', 15, 'bold'],
+                     justify='center')
+
+    add_text()
+    label.pack()
+
+    cropped_rect = ((index % 16) * 250, int(index / 16) * 300, (index % 16) * 250 + 250, int(index / 16) * 300 + 300)
+    cropped_im = photo.crop(cropped_rect)
+    im = ImageTk.PhotoImage(cropped_im)
+    birdo_img = tk.Text(trophy_frame, font=['Times New Roman', 15, 'bold'])
+    birdo_img.image_create(tk.END, image=im)
+    birdo_img.image = im
+
+    tk.Button(button_frame, text="Found", command=submit_confirm).pack(side='left')
+    tk.Button(button_frame, text="Not Found", command=submit).pack(side='left')
+
+    birdo_img.place(x=0, y=0, width=250, height=300)
+    text_frame.grid(row=0)
+    trophy_frame.grid(row=1)
+    button_frame.grid(row=2)
+    new_window.grid_columnconfigure(0, weight=1)
 
     new_window.wait_window()
+
+    return confirmed, close
 
 
 def display_adv(tags, trophy, goomba_trophies):
@@ -202,6 +267,30 @@ def display_adv(tags, trophy, goomba_trophies):
     return results, close
 
 
+def fin_adv():
+    new_window = tk.Toplevel(window)
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
+    center(new_window)
+
+    def on_closing(win):
+        win.destroy()
+
+    def submit():
+        new_window.destroy()
+
+    frame = tk.Frame(new_window)
+
+    tk.Label(frame, text="You collected every trophy!\n\n",
+             font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
+
+    tk.Button(frame, text="Exit", command=submit).pack(side='bottom')
+
+    frame.pack()
+
+    new_window.wait_window()
+
+
 def roll_more_tags(n):
     tags = globals.TAGS
     tag_bool = []
@@ -347,7 +436,8 @@ def disable_children(widget):
     :return: None
     """
     for child in widget.winfo_children():
-        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) or isinstance(child, tk.Menubutton):
+        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) \
+                or isinstance(child, tk.Menubutton) or isinstance(child, tk.Entry):
             child.configure(state='disabled')
         if isinstance(child, tk.Frame):
             disable_children(child)
@@ -398,6 +488,82 @@ def open_bonuses():
     l_search_query = tk.StringVar()
     r_search_query = tk.StringVar()
 
+    def l_search_update():
+        nonlocal l_search_query
+        nonlocal collected
+        nonlocal l_search
+
+        s = l_search_query.get().lower()
+        n = len(s)
+
+        search_index = 0
+        search_len = len(l_search)
+
+        ind = 0
+        listbox_len = int(collected.size())
+
+        if s == '':
+            while len(l_search) > 0:
+                val = l_search.pop()
+                index, _ = get_index(collected, val)
+                collected.insert(index, val)
+            return
+
+        while search_index < int(search_len):
+            if l_search[search_index][0:n].lower() == s:
+                index, _ = get_index(collected, l_search[search_index])
+                collected.insert(index, l_search[search_index])
+                l_search.pop(search_index)
+                search_len -= 1
+            else:
+                search_index += 1
+
+        while ind < int(listbox_len):
+            if collected.get(ind)[0:n].lower() != s:
+                l_search.append(collected.get(ind))
+                collected.delete(ind)
+                listbox_len -= 1
+            else:
+                ind += 1
+
+    def r_search_update():
+        nonlocal r_search_query
+        nonlocal uncollected
+        nonlocal r_search
+
+        s = r_search_query.get().lower()
+        n = len(s)
+
+        search_index = 0
+        search_len = len(r_search)
+
+        ind = 0
+        listbox_len = uncollected.size()
+
+        if s == '':
+            while len(r_search) > 0:
+                val = r_search.pop()
+                index, _ = get_index(uncollected, val)
+                uncollected.insert(index, val)
+            return
+
+        while search_index < search_len:
+            if r_search[search_index][0:n].lower() == s:
+                index, _ = get_index(uncollected, r_search[search_index])
+                uncollected.insert(index, r_search[search_index])
+                r_search.pop(search_index)
+                search_len -= 1
+            else:
+                search_index += 1
+
+        while ind < listbox_len:
+            if uncollected.get(ind)[0:n].lower() != s:
+                r_search.append(uncollected.get(ind))
+                uncollected.delete(ind)
+                listbox_len -= 1
+            else:
+                ind += 1
+
     def get_index(listbox, entry):
         """
         Find the index within the listbox for where it should place the current entry. This will also find the index
@@ -430,17 +596,39 @@ def open_bonuses():
 
         :return: None
         """
-        while move_col.size() > 0:
-            index, bonuses_index = get_index(uncollected, move_col.get(0))
-            uncollected.insert(index, move_col.get(0))
-            globals.bonuses[bonuses_index][1] = 0
-            move_col.delete(0)
+        nonlocal move_col
+        nonlocal move_un
+        nonlocal collected
+        nonlocal uncollected
+        nonlocal r_search_query
+        nonlocal l_search_query
+        nonlocal r_search
+        nonlocal l_search
+
+        r_search_query.set('')
+        l_search_query.set('')
+
+        while len(r_search) > 0:
+            val = r_search.pop()
+            index, _ = get_index(uncollected, val)
+            uncollected.insert(index, val)
+
+        while len(l_search) > 0:
+            val = l_search.pop()
+            index, _ = get_index(collected, val)
+            collected.insert(index, val)
 
         while move_un.size() > 0:
             index, bonuses_index = get_index(collected, move_un.get(0))
             collected.insert(index, move_un.get(0))
             globals.bonuses[bonuses_index][1] = 1
             move_un.delete(0)
+
+        while move_col.size() > 0:
+            index, bonuses_index = get_index(uncollected, move_col.get(0))
+            uncollected.insert(index, move_col.get(0))
+            globals.bonuses[bonuses_index][1] = 0
+            move_col.delete(0)
 
     def move_bonus_collected_back(event):
         """
@@ -519,6 +707,25 @@ def open_bonuses():
         collected.delete(0, tk.END)
         uncollected.delete(0, tk.END)
 
+    def move_hidden():
+        nonlocal r_search
+        nonlocal l_search
+        nonlocal l_search_query
+        nonlocal r_search_query
+
+        l_search_query.set('')
+        r_search_query.set('')
+
+        while len(r_search) > 0:
+            val = r_search.pop()
+            index, _ = get_index(uncollected, val)
+            uncollected.insert(index, val)
+
+        while len(l_search) > 0:
+            val = l_search.pop()
+            index, _ = get_index(collected, val)
+            collected.insert(index, val)
+
     def auto_complete():
         """
         Runs MyBonusChecker and disables user input to the main window
@@ -530,6 +737,7 @@ def open_bonuses():
             no_window_selected()
             return
         """
+        move_hidden()
         clear_listboxes()
         disable_children(window)
         run_bonus_checker()
@@ -570,6 +778,9 @@ def open_bonuses():
         bg = "#100817"
         fg = "#ffffff"
 
+        l_listbox_frame = tk.Frame(bonuses_frame)
+        r_listbox_frame = tk.Frame(bonuses_frame)
+
         middle = tk.Frame(bonuses_frame)
 
         move_un = tk.Listbox(middle,
@@ -584,7 +795,7 @@ def open_bonuses():
                               height=18,
                               selectmode=tk.SINGLE)
 
-        collected = tk.Listbox(bonuses_frame,
+        collected = tk.Listbox(l_listbox_frame,
                                bg=bg,
                                font=("Franklin_Gothic_Medium", 20, "bold"),
                                fg=fg,
@@ -592,7 +803,7 @@ def open_bonuses():
                                height=20,
                                selectmode=tk.SINGLE)
 
-        uncollected = tk.Listbox(bonuses_frame,
+        uncollected = tk.Listbox(r_listbox_frame,
                                  bg=bg,
                                  font=("Franklin_Gothic_Medium", 20, "bold"),
                                  fg=fg,
@@ -617,8 +828,17 @@ def open_bonuses():
                  font=("Franklin_Gothic_Medium", 20, "bold"),
                  fg="#000000").pack(side='top')
 
-        collected.grid(row=1, column=1)
-        uncollected.grid(row=1, column=3)
+        tk.Entry(l_listbox_frame, textvariable=l_search_query).grid(row=0)
+        tk.Entry(r_listbox_frame, textvariable=r_search_query).grid(row=0)
+
+        l_search_query.trace('w', lambda *args: l_search_update())
+        r_search_query.trace('w', lambda *args: r_search_update())
+
+        collected.grid(row=1)
+        uncollected.grid(row=1)
+
+        l_listbox_frame.grid(row=1, column=1)
+        r_listbox_frame.grid(row=1, column=3)
 
         fill_listboxes()
 
@@ -738,15 +958,30 @@ def open_trophies():
     def start_birdo():
         from All_Trophies_RNG.initial_birdo import main
         nonlocal collected
+        nonlocal uncollected
 
-        rolled_tags = roll_more_tags(5)
+        index = 94
+        trophies = globals.trophies
+        birdo = trophies[index]
 
-        owned_trophies = []
+        if not birdo[1]:
+            owned_trophies = []
 
-        for i in range(collected.size()):
-            owned_trophies.append(collected.get(i))
+            for i in range(collected.size()):
+                owned_trophies.append(collected.get(i))
 
-        main(rolled_tags, owned_trophies)
+            confirmed, break_flag = main(owned_trophies)
+
+            while not confirmed and not break_flag:
+                confirmed, break_flag = main(owned_trophies)
+
+            if confirmed:
+                i = uncollected.get(0, tk.END).index(birdo[0])
+                new_index, _ = get_index(collected, birdo[0])
+                collected.insert(new_index, birdo[0])
+                uncollected.delete(i)
+                trophies[index][1] = 1
+
 
     def start_adv():
         from All_Trophies_RNG.end_adv1_1 import main
@@ -764,8 +999,10 @@ def open_trophies():
         enable_children(window)
 
         for trophy in confirmed:
+            i = uncollected.get(0, tk.END).index(trophy)
             index, trophies_index = get_index(collected, trophy)
-            uncollected.insert(index, trophy)
+            collected.insert(index, trophy)
+            uncollected.delete(i)
             trophies[trophies_index][1] = 1
 
     def fill_listboxes():
@@ -819,6 +1056,10 @@ def open_trophies():
         nonlocal r_search_query
         nonlocal l_search
         nonlocal r_search_query
+        nonlocal collected
+        nonlocal uncollected
+        nonlocal move_un
+        nonlocal move_col
 
         r_search_query.set('')
         l_search_query.set('')
@@ -1051,17 +1292,6 @@ def open_trophies():
             uncollected.delete(index)
             move_un.insert(get_index(move_un, data)[0], data)
 
-    def clear_listboxes():
-        """
-        Delete every entry in the 2 middle, uncollected, and collected listboxes
-
-        :return: None
-        """
-        move_un.delete(0, tk.END)
-        move_col.delete(0, tk.END)
-        collected.delete(0, tk.END)
-        uncollected.delete(0, tk.END)
-
     if not booleans[1]:
         bg = "#7a7a7a"
         fg = "#fdfdfd"
@@ -1158,8 +1388,8 @@ def adjust_bonuses():
     global cur
 
     if not booleans[2]:
-        bg = "#100817"
-        fg = "#ffffff"
+        # bg = "#100817"
+        # fg = "#ffffff"
 
         booleans[2] = 2
 
