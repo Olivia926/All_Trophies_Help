@@ -1,13 +1,11 @@
 import globals
-import AppGlobals
+from globals import center
 import tkinter as tk
-from tkinter import ttk
 import threading
 from PIL import Image, ImageTk
 
-window = AppGlobals.window
-cur = AppGlobals.cur
-game_window = AppGlobals.game_window
+window = globals.window
+cur = globals.cur
 
 bonuses_frame = tk.Frame(window)
 
@@ -18,34 +16,58 @@ booleans = [0, 0, 0]
 
 
 def display_birdo(tags, num_coins, num_steps):
+    """
+    Handles displaying the window that shows user necessary information to obtain the Birdo trophy
+
+    :param: tags: list of tags user inputs
+    :param: num_coins: the number of coins the user needs to input into the lottery
+    :param: num_steps: the number of times the "random" button needs to be hit on name selection screen
+    """
     index = 94
-    file = "../Images/Image_Atlas.png"
+    file = "Images/Image_Atlas.png"
     photo = Image.open(file)
     close = False
     confirmed = 0
 
     def submit():
+        """
+        Handles user clicking "not found" button
+        """
+
         new_window.destroy()
 
     def submit_confirm():
+        """
+        Handles user clicking "found" button
+        """
         nonlocal confirmed
 
         confirmed = 1
+        globals.updated = True
         new_window.destroy()
 
     def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
         nonlocal close
 
         close = True
         win.destroy()
 
     def change_text():
+        """
+        Unimplemented method that will dynamically update the text on screen
+        """
         nonlocal num_steps
         if num_steps > 0:
             num_steps -= 1
         add_text()
 
     def add_text():
+        """
+        Helper method that changes text on screen
+        """
         nonlocal label
 
         if len(tags) == 0:
@@ -65,11 +87,12 @@ def display_birdo(tags, num_coins, num_steps):
                 else:
                     text = f'{text}{tags[i]}'
 
-        label.config(text=f'{text}\nPress "Space" to decrease count!\n'
+        label.config(text=f'{text}\n'
                           f'When you have made it to the end, '
                           f'go to the lottery and spend {num_coins} coins!\n')
 
     new_window = tk.Toplevel(window)
+    new_window.title("Record")
     new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
     new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 7 / 11)}")
     center(new_window)
@@ -107,8 +130,16 @@ def display_birdo(tags, num_coins, num_steps):
 
 
 def display_adv(tags, trophy, goomba_trophies):
+    """
+    Handles displaying the window that shows user the trophies that can be acquired in an adventure run
+
+    :param: tags: list of tags user inputs
+    :param: trophy: the trophy that will spawn on the stage
+    :param: goomba_trophies: the trophy(ies) that can be acquired by jumping on goombas
+    """
+
     trophies = globals.trophies
-    file = "../Images/Image_Atlas.png"
+    file = "Images/Image_Atlas.png"
     photo = Image.open(file)
     confirmed = [0]
     close = False
@@ -124,15 +155,23 @@ def display_adv(tags, trophy, goomba_trophies):
             txt.config(background='green')
 
     def submit():
+        """
+        Handles hitting the "submit" button
+        """
+
         new_window.destroy()
 
     def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
         nonlocal close
 
         close = True
         win.destroy()
 
     new_window = tk.Toplevel(window)
+    new_window.title('Record')
     new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
     new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
     center(new_window)
@@ -166,6 +205,7 @@ def display_adv(tags, trophy, goomba_trophies):
     text_frame.pack(side='top')
 
     frame_1 = tk.Frame(trophy_frame, width=250, height=300)
+    frame_1.grid(row=0, column=0)
     frame_1.grid(row=0, column=0)
     text_stage = tk.Text(frame_1, font=['Times New Roman', 15, 'bold'])
     text_stage.place(x=0, y=0, width=250, height=300)
@@ -268,15 +308,24 @@ def display_adv(tags, trophy, goomba_trophies):
 
 
 def fin_adv():
+    """
+    Handles the window that shows when every 1P only trophy is collected
+    """
     new_window = tk.Toplevel(window)
     new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
     new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
     center(new_window)
 
     def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
         win.destroy()
 
     def submit():
+        """
+        Handles hitting the "submit" button
+        """
         new_window.destroy()
 
     frame = tk.Frame(new_window)
@@ -292,18 +341,27 @@ def fin_adv():
 
 
 def roll_more_tags(n):
+    """
+    Handles displaying window that allows user to enter tags
+
+    :param: n: Number of tags for user to enter
+    """
     tags = globals.TAGS
     tag_bool = []
     svar = []
     close = False
 
     def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
         nonlocal close
 
         close = True
         win.destroy()
 
     new_window = tk.Toplevel(window)
+    new_window.title("Record_first")
     new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
     new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
     center(new_window)
@@ -329,6 +387,9 @@ def roll_more_tags(n):
         svar[4].trace('w', lambda *args: text_settings(svar[4], 4))
 
     def check_finish():
+        """
+        Checks if all tags are available to be submitted and turns on the "submit" button if they are
+        """
         for num in tag_bool:
             if num == 0:
                 btn.config(state='disabled')
@@ -336,12 +397,24 @@ def roll_more_tags(n):
         btn.config(state='normal')
 
     def text_settings(text, identifier):
+        """
+        Every time a text field is updated, this method is called and updates text settings
+
+        :param: text: text field that contains the inputted text
+        :param: identifier: number used to determine which text field is being used
+        """
         if character_limit(text):
             text.set(text.get().upper())
 
         check_tag(text, identifier)
 
     def check_tag(text, identifier):
+        """
+        Checks if the tag is in the "tags" array
+
+        :param: text: text field that contains the inputted text
+        :param: identifier: number used to determine which text field is being used
+        """
         if len(text.get()) >= 2:
             if text.get() in tags:
                 tag_bool[identifier] = 1
@@ -353,6 +426,11 @@ def roll_more_tags(n):
             check_finish()
 
     def character_limit(text):
+        """
+        Enters characters into field in uppercase and disallows users from entering more than 4 characters
+
+        :param: text: text field that contains the inputted text
+        """
         if len(text.get()) > 4:
             text.set(text.get()[:-1].upper())
             return 0
@@ -360,6 +438,9 @@ def roll_more_tags(n):
         return 1
 
     def submit_tags():
+        """
+        Handles hitting the "submit" button
+        """
         new_window.destroy()
 
     if n == 1:
@@ -387,7 +468,7 @@ def roll_more_tags(n):
         return [], close
 
     if n == 1:
-        return tags.index(svar[0].get())
+        return tags.index(svar[0].get()), close
 
     rolled_tags = []
     for tag in svar:
@@ -396,24 +477,21 @@ def roll_more_tags(n):
     return rolled_tags, close
 
 
-def center(win):
-    """
-    Centers a tkinter window
+"""
+def get_monitor_from_coord(x, y):
+    
+    Unused method that would find the current monitor based on the x and y coordinates
 
-    :param win: the window to center
-    """
-    win.update_idletasks()
-    width = win.winfo_width()
-    frm_width = win.winfo_rootx() - win.winfo_x()
-    win_width = width + 2 * frm_width
-    height = win.winfo_height()
-    titlebar_height = win.winfo_rooty() - win.winfo_y()
-    win_height = height + titlebar_height + frm_width
-    x = win.winfo_screenwidth() // 2 - win_width // 2
-    y = win.winfo_screenheight() // 2 - win_height // 2
-    win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-    win.deiconify()
+    :param: x: x coordinate of click
+    :param: y: y coordinate of click
+    
+    monitors = screeninfo.get_monitors()
 
+    for m in reversed(monitors):
+        if m.x <= x <= m.width + m.x and m.y <= y <= m.height + m.y:
+            return m
+    return monitors[0]
+"""
 
 def no_window_selected():
     """
@@ -451,7 +529,8 @@ def enable_children(widget):
     :return: None
     """
     for child in widget.winfo_children():
-        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) or isinstance(child, tk.Menubutton):
+        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) \
+                or isinstance(child, tk.Menubutton) or isinstance(child, tk.Entry):
             child.configure(state='normal')
         if isinstance(child, tk.Frame):
             enable_children(child)
@@ -489,6 +568,9 @@ def open_bonuses():
     r_search_query = tk.StringVar()
 
     def l_search_update():
+        """
+        Searches the collected listbox for the current search query
+        """
         nonlocal l_search_query
         nonlocal collected
         nonlocal l_search
@@ -527,6 +609,9 @@ def open_bonuses():
                 ind += 1
 
     def r_search_update():
+        """
+        Searches the uncollected listbox for the current search query
+        """
         nonlocal r_search_query
         nonlocal uncollected
         nonlocal r_search
@@ -630,6 +715,8 @@ def open_bonuses():
             globals.bonuses[bonuses_index][1] = 0
             move_col.delete(0)
 
+        globals.updated = True
+
     def move_bonus_collected_back(event):
         """
         Move from the middle listbox to the collected listbox
@@ -702,12 +789,20 @@ def open_bonuses():
 
         :return: None
         """
+        nonlocal move_un
+        nonlocal move_col
+        nonlocal collected
+        nonlocal uncollected
+
         move_un.delete(0, tk.END)
         move_col.delete(0, tk.END)
         collected.delete(0, tk.END)
         uncollected.delete(0, tk.END)
 
     def move_hidden():
+        """
+        Puts everything that isn't in the search query back into the listboxes in which they were in
+        """
         nonlocal r_search
         nonlocal l_search
         nonlocal l_search_query
@@ -748,7 +843,7 @@ def open_bonuses():
 
         :return: None
         """
-        from All_Trophies_Image_Recognition.MyBonusChecker import main
+        from All_Trophies_App.All_Trophies_Image_Recognition.MyBonusChecker import main
 
         label = tk.Label(auto_checker_frame, text="Checking Bonuses...")
         label.pack(side='top')
@@ -773,6 +868,11 @@ def open_bonuses():
             bonuses_frame.after(1000, check_if_done)
 
         schedule_check()
+
+    if globals.finished_updating:
+        booleans[0] = 0
+        for widget in bonuses_frame.winfo_children():
+            widget.destroy()
 
     if not booleans[0]:
         bg = "#100817"
@@ -864,10 +964,10 @@ def open_bonuses():
 
         booleans[0] = 1
 
-    hide_cur()
-    cur = 0
-
-    bonuses_frame.pack()
+    if not globals.finished_updating:
+        hide_cur()
+        cur = 0
+        bonuses_frame.pack()
 
 
 def open_trophies():
@@ -956,7 +1056,7 @@ def open_trophies():
         right_menu.pack(side='bottom')
 
     def start_birdo():
-        from All_Trophies_RNG.initial_birdo import main
+        from All_Trophies_App.All_Trophies_RNG.initial_birdo import main
         nonlocal collected
         nonlocal uncollected
 
@@ -977,18 +1077,15 @@ def open_trophies():
 
             if confirmed:
                 i = uncollected.get(0, tk.END).index(birdo[0])
-                new_index, _ = get_index(collected, birdo[0])
+                new_index, _, _ = get_index(collected, birdo[0])
                 collected.insert(new_index, birdo[0])
                 uncollected.delete(i)
                 trophies[index][1] = 1
 
-
     def start_adv():
-        from All_Trophies_RNG.end_adv1_1 import main
+        from All_Trophies_App.All_Trophies_RNG.end_adv1_1 import main
         from globals import trophies
         nonlocal collected
-
-        disable_children(window)
 
         owned_trophies = []
         for i in range(collected.size()):
@@ -1000,10 +1097,39 @@ def open_trophies():
 
         for trophy in confirmed:
             i = uncollected.get(0, tk.END).index(trophy)
-            index, trophies_index = get_index(collected, trophy)
+            index, trophies_index, _ = get_index(collected, trophy)
             collected.insert(index, trophy)
+            collected.itemconfig(index, {'bg': 'green'})
             uncollected.delete(i)
             trophies[trophies_index][1] = 1
+
+    def clear_listboxes():
+        """
+        Remove all listbox entries from both listboxes
+
+        :return: None
+        """
+        nonlocal hidden_left
+        nonlocal hidden_right
+        nonlocal collected
+        nonlocal uncollected
+        nonlocal move_col
+        nonlocal move_un
+        nonlocal l_search
+        nonlocal l_search_query
+        nonlocal r_search
+        nonlocal r_search_query
+
+        collected.delete(0, tk.END)
+        uncollected.delete(0, tk.END)
+        move_col.delete(0, tk.END)
+        move_un.delete(0, tk.END)
+        hidden_left = []
+        hidden_right = []
+        l_search_query.set("")
+        r_search_query.set("")
+        l_search = []
+        r_search = []
 
     def fill_listboxes():
         """
@@ -1011,11 +1137,15 @@ def open_trophies():
 
         :return: None
         """
-        for trophy, state, thing, bucket in globals.trophies:
+        for trophy, state, lotto, bucket in globals.trophies:
             if state == 0:
                 uncollected.insert(uncollected.size(), trophy)
+                if not lotto:
+                    uncollected.itemconfig(uncollected.size() - 1, {'bg': 'green'})
             else:
                 collected.insert(collected.size(), trophy)
+                if not lotto:
+                    collected.itemconfig(collected.size() - 1, {'bg': 'green'})
 
     def get_index(listbox, entry):
         """
@@ -1024,28 +1154,35 @@ def open_trophies():
 
         :param listbox:
         :param entry:
-        :return: array containing the index in the listbox to put the current value
-                 and the index of the trophies array, in that order.
+        :return: array containing
+                 the index in the listbox to put the current value,
+                 the index of the trophies array,
+                 and if it is a one player trophy
+                 in that order.
         """
         trophies = globals.trophies
         index = 0
+        lotto = 1
 
         for i in range(len(trophies)):
             if entry == trophies[i][0]:
                 index = i
                 break
 
+        if not trophies[index][2]:
+            lotto = 0
+
         for i in range(listbox.size()):
             for j in range(len(trophies)):
                 if listbox.get(i) == trophies[j][0]:
                     if j > index:
-                        return i, index
+                        return i, index, lotto
 
-        return tk.END, index
+        return tk.END, index, lotto
 
     def move_all_trophies():
         """
-        Move every trophy from the middle listboxes to the collected and uncollected listboxes
+        Move every trophy from the middle and search listboxes to the collected and uncollected listboxes
 
         :return: None
         """
@@ -1066,39 +1203,53 @@ def open_trophies():
 
         while len(r_search) > 0:
             val = r_search.pop()
-            index, _ = get_index(uncollected, val)
+            index, _, lotto = get_index(uncollected, val)
             uncollected.insert(index, val)
+            if not lotto:
+                uncollected.itemconfig(index, {'bg': 'green'})
 
         while len(l_search) > 0:
             val = l_search.pop()
-            index, _ = get_index(collected, val)
+            index, _, lotto = get_index(collected, val)
             collected.insert(index, val)
+            if not lotto:
+                collected.itemconfig(index, {'bg': 'green'})
 
         while move_col.size() > 0:
-            index, trophies_index = get_index(uncollected, move_col.get(0))
+            index, trophies_index, lotto = get_index(uncollected, move_col.get(0))
             if r_buc != "All":
                 if move_col.get(0) == trophies[trophies_index][0]:
                     if r_buc == trophies[trophies_index][3]:
                         uncollected.insert(index, move_col.get(0))
+                        if not lotto:
+                            uncollected.itemconfig(uncollected.size() - 1, {'bg': 'green'})
                     else:
                         hidden_right.append(trophies[trophies_index][0])
             else:
                 uncollected.insert(index, move_col.get(0))
+                if not lotto:
+                    uncollected.itemconfig(index, {'bg':'green'})
             trophies[trophies_index][1] = 0
             move_col.delete(0)
 
         while move_un.size() > 0:
-            index, trophies_index = get_index(collected, move_un.get(0))
+            index, trophies_index, lotto = get_index(collected, move_un.get(0))
             if l_buc != "All":
                 if move_un.get(0) == trophies[trophies_index][0]:
                     if l_buc == trophies[trophies_index][3]:
                         collected.insert(index, move_un.get(0))
+                        if not lotto:
+                            collected.itemconfig(index, {'bg': 'green'})
                     else:
                         hidden_left.append(trophies[trophies_index][0])
             else:
                 collected.insert(index, move_un.get(0))
+                if not lotto:
+                    collected.itemconfig(index, {'bg': 'green'})
             trophies[trophies_index][1] = 1
             move_un.delete(0)
+
+            globals.updated = True
 
     def l_search_update():
         nonlocal l_search_query
@@ -1117,14 +1268,18 @@ def open_trophies():
         if s == '':
             while len(l_search) > 0:
                 val = l_search.pop()
-                index, _ = get_index(collected, val)
+                index, _, lotto = get_index(collected, val)
                 collected.insert(index, val)
+                if not lotto:
+                    collected.itemconfig(index, {'bg': 'green'})
             return
 
         while search_index < int(search_len):
             if l_search[search_index][0:n].lower() == s:
-                index, _ = get_index(collected, l_search[search_index])
+                index, _, lotto = get_index(collected, l_search[search_index])
                 collected.insert(index, l_search[search_index])
+                if not lotto:
+                    collected.itemconfig(index, {'bg': 'green'})
                 l_search.pop(search_index)
                 search_len -= 1
             else:
@@ -1155,14 +1310,18 @@ def open_trophies():
         if s == '':
             while len(r_search) > 0:
                 val = r_search.pop()
-                index, _ = get_index(uncollected, val)
+                index, _, lotto = get_index(uncollected, val)
                 uncollected.insert(index, val)
+                if not lotto:
+                    uncollected.itemconfig(index, {'bg': 'green'})
             return
 
         while search_index < search_len:
             if r_search[search_index][0:n].lower() == s:
-                index, _ = get_index(uncollected, r_search[search_index])
+                index, _, lotto = get_index(uncollected, r_search[search_index])
                 uncollected.insert(index, r_search[search_index])
+                if not lotto:
+                    uncollected.itemconfig(index, {'bg': 'green'})
                 r_search.pop(search_index)
                 search_len -= 1
             else:
@@ -1181,8 +1340,10 @@ def open_trophies():
         nonlocal hidden_left
 
         while len(hidden_left) > 0:
-            index, _ = get_index(collected, hidden_left[len(hidden_left) - 1])
+            index, _, lotto = get_index(collected, hidden_left[len(hidden_left) - 1])
             collected.insert(index, hidden_left.pop())
+            if not lotto:
+                collected.itemconfig(index, {'bg': 'green'})
 
     def left_bucket(bucket):
         trophies = globals.trophies
@@ -1195,8 +1356,10 @@ def open_trophies():
 
         while len(l_search) > 0:
             val = l_search.pop()
-            index, _ = get_index(collected, val)
+            index, _, lotto = get_index(collected, val)
             collected.insert(index, val)
+            if not lotto:
+                collected.itemconfig(index, {'bg': 'green'})
 
         l_buc = bucket
         move_left_trophies()
@@ -1212,8 +1375,10 @@ def open_trophies():
         nonlocal uncollected
 
         while len(hidden_right) > 0:
-            index, _ = get_index(uncollected, hidden_right[len(hidden_right) - 1])
+            index, _, lotto = get_index(uncollected, hidden_right[len(hidden_right) - 1])
             uncollected.insert(index, hidden_right.pop())
+            if not lotto:
+                uncollected.itemconfig(index, {'bg': 'green'})
 
     def right_bucket(bucket):
         trophies = globals.trophies
@@ -1226,8 +1391,10 @@ def open_trophies():
 
         while len(r_search) > 0:
             val = r_search.pop()
-            index, _ = get_index(uncollected, val)
+            index, _, lotto = get_index(uncollected, val)
             uncollected.insert(index, val)
+            if not lotto:
+                uncollected.itemconfig(index, {'bg': 'green'})
 
         r_buc = bucket
         move_right_trophies()
@@ -1249,7 +1416,10 @@ def open_trophies():
             index = selection[0]
             data = event.widget.get(index)
             move_col.delete(index)
-            collected.insert(get_index(collected, data)[0], data)
+            ind, _, lotto = get_index(collected, data)
+            collected.insert(ind, data)
+            if not lotto:
+                collected.itemconfig(ind, {'bg': 'green'})
 
     def move_trophy_collected(event):
         """
@@ -1262,7 +1432,10 @@ def open_trophies():
             index = selection[0]
             data = event.widget.get(index)
             collected.delete(index)
-            move_col.insert(get_index(move_col, data)[0], data)
+            ind, _, lotto = get_index(move_col, data)
+            move_col.insert(ind, data)
+            if not lotto:
+                move_col.itemconfig(ind, {'bg': 'green'})
 
     def move_trophy_uncollected_back(event):
         """
@@ -1276,7 +1449,10 @@ def open_trophies():
             index = selection[0]
             data = event.widget.get(index)
             move_un.delete(index)
-            uncollected.insert(get_index(uncollected, data)[0], data)
+            ind, _, lotto = get_index(uncollected, data)
+            uncollected.insert(ind, data)
+            if not lotto:
+                uncollected.itemconfig(ind, {'bg': 'green'})
 
     def move_trophy_uncollected(event):
         """
@@ -1290,7 +1466,15 @@ def open_trophies():
             index = selection[0]
             data = event.widget.get(index)
             uncollected.delete(index)
-            move_un.insert(get_index(move_un, data)[0], data)
+            ind, _, lotto = get_index(move_un, data)
+            move_un.insert(ind, data)
+            if not lotto:
+                move_un.itemconfig(ind, {'bg': 'green'})
+
+    if globals.finished_updating:
+        booleans[1] = 0
+        for widget in trophies_frame.winfo_children():
+            widget.destroy()
 
     if not booleans[1]:
         bg = "#7a7a7a"
@@ -1378,10 +1562,10 @@ def open_trophies():
 
         booleans[1] = 1
 
-    hide_cur()
-    cur = 1
-
-    trophies_frame.pack()
+    if not globals.finished_updating:
+        hide_cur()
+        cur = 1
+        trophies_frame.pack()
 
 
 def adjust_bonuses():
