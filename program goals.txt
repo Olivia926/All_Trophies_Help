@@ -1,0 +1,24 @@
+REQUIRED
+Allow Bonus Checker to work on every monitor based on first click placement
+Make executable to load app
+Bonus checker windows
+Update README
+
+NICE ADDITIONS THAT ARE NEAR REQUIRED
+Reset bonuses/trophies button
+Resources tab for future spreadsheets, documents, "requirements", etc for run
+Videos showing functionality
+Scalable window
+
+OPTIONAL
+Hotkeys in program
+1P section in trophy buckets
+Search for Tags in birdo/adventure tag insertion
+Option to press different button for bonus checker
+Fix trophy image sizing to fit window
+Birdo auto decreasing number
+Center Window
+
+FINISHED
+Save and load functionality
+Fix window opening on wrong display

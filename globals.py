@@ -1,4 +1,27 @@
-window = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
+import tkinter as tk
+
+window = tk.Tk()
+cur = 0
+updated = False
+finished_updating = False
+
+
+def center(win):
+    """
+    Centers a tkinter window
+
+    :param win: the window to center
+    """
+    global window
+
+    win.update_idletasks()
+    width = win.winfo_width()
+    height = win.winfo_height()
+    x = int(window.winfo_rootx() + (window.winfo_width() // 2) - (width // 2))
+    y = int(window.winfo_rooty() + (window.winfo_height() // 2) - (height // 1.5))
+    win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+    win.deiconify()
+
 
 # [{Bonus Name}, {Uncollected = 0/Collected = 1}]
 bonuses = [['Bird of Prey', 0], ['Combo King', 0], ['Juggler', 0], ['Backstabber', 0], ['Sweeper', 0],
@@ -58,8 +81,7 @@ bonuses = [['Bird of Prey', 0], ['Combo King', 0], ['Juggler', 0], ['Backstabber
 trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack', 0, 0, 'Item'],
             ['Bucket', 0, 1, 'Item'], ['Capsule', 0, 1, 'Item'], ['Egg', 0, 1, 'Item'], ['Fan', 0, 1, 'Item'],
             ['Flipper', 0, 1, 'Item'], ['Home-Run Bat', 0, 1, 'Item'], ['Megavitamins', 0, 1, 'Item'],
-            ['Mr. Saturn', 0, 1, 'Item'],
-            ['Poison Mushroom', 0, 1, 'Item'], ['Star Rod', 0, 1, 'Item'],
+            ['Mr. Saturn', 0, 1, 'Item'], ['Poison Mushroom', 0, 1, 'Item'], ['Star Rod', 0, 1, 'Item'],
             ['Super Mushroom', 0, 1, 'Item'], ['Super Scope', 0, 1, 'Item'], ['Toad', 0, 1, 'Item'],
             ['Vegetable', 0, 0, 'Container'], ['Warp Star', 0, 0, 'Container'], ['Barrel', 0, 1, 'Container'],
             ['Crate', 0, 1, 'Container'], ['Party Ball', 0, 1, 'Container'], ['Starman 64', 0, 1, 'Container'],
@@ -84,26 +106,22 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Ryoto Hayami', 0, 1, 'Wheels'], ['ZERO-ONE', 0, 1, 'Wheels'], ['Ayumi Tachibana', 0, 0, 'D Bucket'],
             ['Love Giant', 0, 0, 'D Bucket'], ['Daisy', 0, 1, 'D Bucket'], ['Dr. Wright', 0, 1, 'D Bucket'],
             ['Ducks', 0, 1, 'D Bucket'], ['Plum', 0, 0, 'Characters'], ['Lakitu', 0, 1, 'Characters'],
-
-            ['Peppy Hare', 0, 1, 'Characters'],
-
-            ['Starman EB', 0, 1, 'Characters'],
-            ['Goron', 0, 0, 'Zelda'], ['Master Sword', 0, 0, 'Zelda'], ['Balloon Fighter', 0, 1, 'Zelda'],
-            ['Kensuke Kimachi', 0, 1, 'Zelda'], ['Kirby Hat 3', 0, 1, 'Zelda'], ['Stanley', 0, 1, 'Zelda'],
-            ['Like Like', 0, 0, 'Birdo'], ['ReDead', 0, 0, 'Birdo'], ['Birdo', 0, 1, 'Birdo'],
-            ['Polar Bear', 0, 1, 'Birdo'], ['Four Giants', 0, 0, 'Giants'], ['Barrel Cannon', 0, 0, 'Giants'],
-            ['Octorok', 0, 0, 'Octorok'], ['Viruses', 0, 0, 'Sick'], ['Heririn', 0, 1, 'Sick'],
-            ['Racing Kart', 0, 1, 'Sick'], ['Dr. Stewart', 0, 1, 'Hats'], ['Kirby Hat 1', 0, 1, 'Hats'],
-            ['Kirby Hat 2', 0, 1, 'Hats'], ['Metal Mario', 0, 1, 'Hats'], ['Andross', 0, 1, 'Villains'],
-            ['Andross 64', 0, 1, 'Villains'], ['Jody Summer', 0, 1, 'Villains'], ['Meta-Knight', 0, 1, 'Villains'],
-            ['Poo', 0, 1, 'Villains'], ['Ridley', 0, 1, 'Villains'], ['Samurai Goroh', 0, 1, 'Villains'],
-            ['Vacuum Luigi', 0, 1, 'Vacuum Luigi'], ['Totakeke', 0, 1, 'Dog'], ['Alpha', 0, 2, 'Lotto'],
-            ['Articuno', 0, 2, 'Lotto'], ['Arwing', 0, 2, 'Lotto'], ['Baby Mario', 0, 2, 'Lotto'],
-            ['Bayonette', 0, 2, 'Lotto'], ['Boo', 0, 2, 'Lotto'], ['Bubbles', 0, 2, 'Lotto'],
-            ['Chansey', 0, 2, 'Lotto'], ['Chozo Statue', 0, 2, 'Lotto'], ['Ditto', 0, 2, 'Lotto'],
-            ['Dixie Kong', 0, 2, 'Lotto'], ['Eevee', 0, 2, 'Lotto'], ['Eggplant Man', 0, 2, 'Lotto'],
-            ['Fighter Kirby', 0, 2, 'Lotto'], ['Fountain of Dreams', 0, 2, 'Lotto'], ['GCN', 0, 2, 'Lotto'],
-            ['Gooey', 0, 2, 'Lotto'], ['Great Fox', 0, 2, 'Lotto'], ['Hammer', 0, 2, 'Lotto'],
+            ['Peppy Hare', 0, 1, 'Characters'], ['Starman EB', 0, 1, 'Characters'], ['Goron', 0, 0, 'Zelda'],
+            ['Master Sword', 0, 0, 'Zelda'], ['Balloon Fighter', 0, 1, 'Zelda'], ['Kensuke Kimachi', 0, 1, 'Zelda'],
+            ['Kirby Hat 3', 0, 1, 'Zelda'], ['Stanley', 0, 1, 'Zelda'], ['Like Like', 0, 0, 'Birdo'],
+            ['ReDead', 0, 0, 'Birdo'], ['Birdo', 0, 1, 'Birdo'], ['Polar Bear', 0, 1, 'Birdo'],
+            ['Four Giants', 0, 0, 'Giants'], ['Barrel Cannon', 0, 0, 'Giants'], ['Octorok', 0, 0, 'Octorok'],
+            ['Viruses', 0, 0, 'Sick'], ['Heririn', 0, 1, 'Sick'], ['Racing Kart', 0, 1, 'Sick'],
+            ['Dr. Stewart', 0, 1, 'Hats'], ['Kirby Hat 1', 0, 1, 'Hats'], ['Kirby Hat 2', 0, 1, 'Hats'],
+            ['Metal Mario', 0, 1, 'Hats'], ['Andross', 0, 1, 'Villains'], ['Andross 64', 0, 1, 'Villains'],
+            ['Jody Summer', 0, 1, 'Villains'], ['Meta-Knight', 0, 1, 'Villains'], ['Poo', 0, 1, 'Villains'],
+            ['Ridley', 0, 1, 'Villains'], ['Samurai Goroh', 0, 1, 'Villains'], ['Vacuum Luigi', 0, 1, 'Vacuum Luigi'],
+            ['Totakeke', 0, 1, 'Dog'], ['Alpha', 0, 2, 'Lotto'], ['Articuno', 0, 2, 'Lotto'], ['Arwing', 0, 2, 'Lotto'],
+            ['Baby Mario', 0, 2, 'Lotto'], ['Bayonette', 0, 2, 'Lotto'], ['Boo', 0, 2, 'Lotto'],
+            ['Bubbles', 0, 2, 'Lotto'], ['Chansey', 0, 2, 'Lotto'], ['Chozo Statue', 0, 2, 'Lotto'],
+            ['Ditto', 0, 2, 'Lotto'], ['Dixie Kong', 0, 2, 'Lotto'], ['Eevee', 0, 2, 'Lotto'],
+            ['Eggplant Man', 0, 2, 'Lotto'], ['Fighter Kirby', 0, 2, 'Lotto'], ['Fountain of Dreams', 0, 2, 'Lotto'],
+            ['GCN', 0, 2, 'Lotto'], ['Gooey', 0, 2, 'Lotto'], ['Great Fox', 0, 2, 'Lotto'], ['Hammer', 0, 2, 'Lotto'],
             ['Hate Giant', 0, 2, 'Lotto'], ['Ho-Oh', 0, 2, 'Lotto'], ['Jeff', 0, 2, 'Lotto'],
             ['King Dedede', 0, 2, 'Lotto'], ['King K. Rool', 0, 2, 'Lotto'], ['Koopa Clown Car', 0, 2, 'Lotto'],
             ['Maruo Maruhigo', 0, 2, 'Lotto'], ['Misty', 0, 2, 'Lotto'], ['Moltres', 0, 2, 'Lotto'],

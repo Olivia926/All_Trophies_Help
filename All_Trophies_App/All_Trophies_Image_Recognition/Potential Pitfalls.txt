@@ -1,0 +1,17 @@
+Bonuses
+======================================================================
+X Scrolling at irregular rates
+O Scrolling too quickly
+O Unable to read text for some reason
+O Reading top or bottom bonuses
+X Unable to capture good screen region
+Double counting bonuses due to not scrolling fast enough or finding
+	a way to "move" to next bonus
+Moving backwards in the bonuses
+
+Trophies
+======================================================================
+X Unordered
+Unable to capture every trophy
+Double counting
+Collection or Gallery?
