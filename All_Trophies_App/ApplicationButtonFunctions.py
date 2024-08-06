@@ -2,538 +2,17 @@ import globals
 from globals import center
 import tkinter as tk
 import threading
+import pynput.mouse
 from PIL import Image, ImageTk
 
 window = globals.window
 cur = globals.cur
 
 bonuses_frame = tk.Frame(window)
-
 trophies_frame = tk.Frame(window)
 bonus_org_frame = tk.Frame(window)
 
 booleans = [0, 0, 0]
-
-
-def display_birdo(tags, num_coins, num_steps):
-    """
-    Handles displaying the window that shows user necessary information to obtain the Birdo trophy
-
-    :param: tags: list of tags user inputs
-    :param: num_coins: the number of coins the user needs to input into the lottery
-    :param: num_steps: the number of times the "random" button needs to be hit on name selection screen
-    """
-    index = 94
-    file = "Images/Image_Atlas.png"
-    photo = Image.open(file)
-    close = False
-    confirmed = 0
-
-    def submit():
-        """
-        Handles user clicking "not found" button
-        """
-
-        new_window.destroy()
-
-    def submit_confirm():
-        """
-        Handles user clicking "found" button
-        """
-        nonlocal confirmed
-
-        confirmed = 1
-        globals.updated = True
-        new_window.destroy()
-
-    def on_closing(win):
-        """
-        Handles user clicking the close button on the window (X in top right)
-        """
-        nonlocal close
-
-        close = True
-        win.destroy()
-
-    def change_text():
-        """
-        Unimplemented method that will dynamically update the text on screen
-        """
-        nonlocal num_steps
-        if num_steps > 0:
-            num_steps -= 1
-        add_text()
-
-    def add_text():
-        """
-        Helper method that changes text on screen
-        """
-        nonlocal label
-
-        if len(tags) == 0:
-            text = 'Do not roll more tags!\n'
-        elif len(tags) <= 5:
-            text = f'Roll {num_steps} more tags!\nThe order of tags will be:\n'
-            for i in range(len(tags)):
-                if i != len(tags) - 1:
-                    text = f'{text}{tags[i]}, '
-                else:
-                    text = f'{text}{tags[i]}'
-        else:
-            text = f'Roll {num_steps} more tags!\nThe final 5 tags will be:\n'
-            for i in range(len(tags) - 5, len(tags), 1):
-                if i != len(tags) - 1:
-                    text = f'{text}{tags[i]}, '
-                else:
-                    text = f'{text}{tags[i]}'
-
-        label.config(text=f'{text}\n'
-                          f'When you have made it to the end, '
-                          f'go to the lottery and spend {num_coins} coins!\n')
-
-    new_window = tk.Toplevel(window)
-    new_window.title("Record")
-    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
-    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 7 / 11)}")
-    center(new_window)
-
-    text_frame = tk.Frame(new_window)
-    trophy_frame = tk.Frame(new_window, width=250, height=300)
-    button_frame = tk.Frame(new_window)
-
-    label = tk.Label(text_frame, text="",
-                     font=['Times New Roman', 15, 'bold'],
-                     justify='center')
-
-    add_text()
-    label.pack()
-
-    cropped_rect = ((index % 16) * 250, int(index / 16) * 300, (index % 16) * 250 + 250, int(index / 16) * 300 + 300)
-    cropped_im = photo.crop(cropped_rect)
-    im = ImageTk.PhotoImage(cropped_im)
-    birdo_img = tk.Text(trophy_frame, font=['Times New Roman', 15, 'bold'])
-    birdo_img.image_create(tk.END, image=im)
-    birdo_img.image = im
-
-    tk.Button(button_frame, text="Found", command=submit_confirm).pack(side='left')
-    tk.Button(button_frame, text="Not Found", command=submit).pack(side='left')
-
-    birdo_img.place(x=0, y=0, width=250, height=300)
-    text_frame.grid(row=0)
-    trophy_frame.grid(row=1)
-    button_frame.grid(row=2)
-    new_window.grid_columnconfigure(0, weight=1)
-
-    new_window.wait_window()
-
-    return confirmed, close
-
-
-def display_adv(tags, trophy, goomba_trophies):
-    """
-    Handles displaying the window that shows user the trophies that can be acquired in an adventure run
-
-    :param: tags: list of tags user inputs
-    :param: trophy: the trophy that will spawn on the stage
-    :param: goomba_trophies: the trophy(ies) that can be acquired by jumping on goombas
-    """
-
-    trophies = globals.trophies
-    file = "Images/Image_Atlas.png"
-    photo = Image.open(file)
-    confirmed = [0]
-    close = False
-
-    def change_state(ind, txt):
-        nonlocal confirmed
-
-        if confirmed[ind]:
-            confirmed[ind] = 0
-            txt.config(background='white')
-        else:
-            confirmed[ind] = 1
-            txt.config(background='green')
-
-    def submit():
-        """
-        Handles hitting the "submit" button
-        """
-
-        new_window.destroy()
-
-    def on_closing(win):
-        """
-        Handles user clicking the close button on the window (X in top right)
-        """
-        nonlocal close
-
-        close = True
-        win.destroy()
-
-    new_window = tk.Toplevel(window)
-    new_window.title('Record')
-    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
-    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
-    center(new_window)
-
-    text_frame = tk.Frame(new_window)
-    trophy_frame = tk.Frame(new_window)
-
-    tk.Label(text_frame, text="Click on trophies you collected! If the background is green, that means it is marked as"
-                              " collected!\n", font=['Times New Roman', 15, 'bold'],
-             justify='center').pack(side='top')
-
-    if len(tags) == 0:
-        text = 'Do not roll any tags!'
-    elif len(tags) <= 5:
-        text = f'Roll {len(tags)} tags!\nThe order of tags will be:\n'
-        for i in range(len(tags)):
-            if i != len(tags)-1:
-                text = f'{text}{tags[i]}, '
-            else:
-                text = f'{text}{tags[i]}'
-    else:
-        text = f'Roll {len(tags)} tags!\nThe final 5 tags will be:\n'
-        for i in range(len(tags)-5, len(tags), 1):
-            if i != len(tags) - 1:
-                text = f'{text}{tags[i]}, '
-            else:
-                text = f'{text}{tags[i]}'
-
-    tk.Label(text_frame, text=text, font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
-
-    text_frame.pack(side='top')
-
-    frame_1 = tk.Frame(trophy_frame, width=250, height=300)
-    frame_1.grid(row=0, column=0)
-    frame_1.grid(row=0, column=0)
-    text_stage = tk.Text(frame_1, font=['Times New Roman', 15, 'bold'])
-    text_stage.place(x=0, y=0, width=250, height=300)
-    text_stage.insert(tk.END, f"Stage trophy:\n{trophy}\n")
-
-    for i in range(len(trophies)):
-        if trophy == trophies[i][0]:
-            cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
-            cropped_im = photo.crop(cropped_rect)
-            im = ImageTk.PhotoImage(cropped_im)
-            text_stage.image_create(tk.END, image=im)
-            text_stage.image = im
-            break
-
-    if len(goomba_trophies) == 1:
-        frame_2 = tk.Frame(trophy_frame, width=250, height=300)
-        frame_2.grid_propagate(False)
-        frame_2.grid(row=0, column=1)
-        text_goomba = tk.Text(frame_2, font=['Times New Roman', 15, 'bold'])
-        text_goomba.place(x=0, y=0, width=250, height=300)
-        text_goomba.insert(tk.END, f"Possible Goomba Trophy:\n{goomba_trophies[0]}\n")
-
-        for i in range(len(trophies)):
-            if goomba_trophies[0] == trophies[i][0]:
-                cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
-                cropped_im = photo.crop(cropped_rect)
-                im_2 = ImageTk.PhotoImage(cropped_im)
-                text_goomba.image_create(tk.END, image=im_2)
-                text_goomba.image = im_2
-                confirmed.append(0)
-                break
-
-        text_goomba.bind("<Button-1>", lambda *args: change_state(1, text_goomba))
-    elif len(goomba_trophies) == 2:
-        frame_2 = tk.Frame(trophy_frame, width=250, height=300)
-        frame_2.grid(row=0, column=1)
-        text_goomba_1 = tk.Text(frame_2, font=['Times New Roman', 15, 'bold'])
-        text_goomba_1.place(x=0, y=0, width=250, height=300)
-        text_goomba_1.insert(tk.END, f"Possible Goomba Trophy:\n{goomba_trophies[0]}\n")
-
-        frame_3 = tk.Frame(trophy_frame, width=250, height=300)
-        frame_3.grid(row=0, column=2)
-        text_goomba_2 = tk.Text(frame_3, font=['Times New Roman', 15, 'bold'])
-        text_goomba_2.place(x=0, y=0, width=250, height=300)
-        text_goomba_2.insert(tk.END, f"Possible Goomba Trophy:\n{goomba_trophies[1]}\n")
-
-        num = 0
-
-        for i in range(len(trophies)):
-            if goomba_trophies[0] == trophies[i][0]:
-                cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
-                cropped_im = photo.crop(cropped_rect)
-                im_2 = ImageTk.PhotoImage(cropped_im)
-                text_goomba_1.image_create(tk.END, image=im_2)
-                text_goomba_1.image = im_2
-                num += 1
-                confirmed.append(0)
-                if num == 2:
-                    break
-
-            if goomba_trophies[1] == trophies[i][0]:
-                cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
-                cropped_im = photo.crop(cropped_rect)
-                im_3 = ImageTk.PhotoImage(cropped_im)
-                text_goomba_2.image_create(tk.END, image=im_3)
-                text_goomba_2.image = im_3
-                num += 1
-                confirmed.append(0)
-                if num == 2:
-                    break
-
-        text_goomba_1.bind("<Button-1>", lambda *args: change_state(1, text_goomba_1))
-        text_goomba_2.bind("<Button-1>", lambda *args: change_state(2, text_goomba_2))
-
-    tk.Button(new_window, text="Submit", font=['Times New Roman', 15, 'bold'],
-              justify='center', command=submit).pack(side='bottom')
-
-    text_stage.bind("<Button-1>", lambda *args: change_state(0, text_stage))
-
-    trophy_frame.pack(side='bottom')
-
-    new_window.wait_window()
-
-    if close:
-        return [], close
-
-    results = []
-    for i in range(len(confirmed)):
-        if i == 0:
-            if confirmed[0]:
-                results.append(trophy)
-        if i == 1:
-            if confirmed[1]:
-                results.append(goomba_trophies[0])
-        if i == 2:
-            if confirmed[2]:
-                results.append(goomba_trophies[1])
-
-    return results, close
-
-
-def fin_adv():
-    """
-    Handles the window that shows when every 1P only trophy is collected
-    """
-    new_window = tk.Toplevel(window)
-    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
-    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
-    center(new_window)
-
-    def on_closing(win):
-        """
-        Handles user clicking the close button on the window (X in top right)
-        """
-        win.destroy()
-
-    def submit():
-        """
-        Handles hitting the "submit" button
-        """
-        new_window.destroy()
-
-    frame = tk.Frame(new_window)
-
-    tk.Label(frame, text="You collected every trophy!\n\n",
-             font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
-
-    tk.Button(frame, text="Exit", command=submit).pack(side='bottom')
-
-    frame.pack()
-
-    new_window.wait_window()
-
-
-def roll_more_tags(n):
-    """
-    Handles displaying window that allows user to enter tags
-
-    :param: n: Number of tags for user to enter
-    """
-    tags = globals.TAGS
-    tag_bool = []
-    svar = []
-    close = False
-
-    def on_closing(win):
-        """
-        Handles user clicking the close button on the window (X in top right)
-        """
-        nonlocal close
-
-        close = True
-        win.destroy()
-
-    new_window = tk.Toplevel(window)
-    new_window.title("Record_first")
-    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
-    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
-    center(new_window)
-
-    text_frame = tk.Frame(new_window)
-
-    for i in range(n):
-        tag_bool.append(0)
-        var = tk.StringVar()
-        tk.Label(text_frame, text=f"Entry {i + 1}", font=['Times New Roman', 15, 'bold'],
-                 justify='center').grid(row=0, column=i)
-        text_frame.grid_columnconfigure(i, weight=1, uniform="text")
-        tk.Entry(text_frame, textvariable=var).grid(row=1, column=i)
-        svar.append(var)
-
-    if n == 1:
-        svar[0].trace('w', lambda *args: text_settings(svar[0], 0))
-    else:
-        svar[0].trace('w', lambda *args: text_settings(svar[0], 0))
-        svar[1].trace('w', lambda *args: text_settings(svar[1], 1))
-        svar[2].trace('w', lambda *args: text_settings(svar[2], 2))
-        svar[3].trace('w', lambda *args: text_settings(svar[3], 3))
-        svar[4].trace('w', lambda *args: text_settings(svar[4], 4))
-
-    def check_finish():
-        """
-        Checks if all tags are available to be submitted and turns on the "submit" button if they are
-        """
-        for num in tag_bool:
-            if num == 0:
-                btn.config(state='disabled')
-                return
-        btn.config(state='normal')
-
-    def text_settings(text, identifier):
-        """
-        Every time a text field is updated, this method is called and updates text settings
-
-        :param: text: text field that contains the inputted text
-        :param: identifier: number used to determine which text field is being used
-        """
-        if character_limit(text):
-            text.set(text.get().upper())
-
-        check_tag(text, identifier)
-
-    def check_tag(text, identifier):
-        """
-        Checks if the tag is in the "tags" array
-
-        :param: text: text field that contains the inputted text
-        :param: identifier: number used to determine which text field is being used
-        """
-        if len(text.get()) >= 2:
-            if text.get() in tags:
-                tag_bool[identifier] = 1
-                check_finish()
-                return
-
-        if tag_bool[identifier]:
-            tag_bool[identifier] = 0
-            check_finish()
-
-    def character_limit(text):
-        """
-        Enters characters into field in uppercase and disallows users from entering more than 4 characters
-
-        :param: text: text field that contains the inputted text
-        """
-        if len(text.get()) > 4:
-            text.set(text.get()[:-1].upper())
-            return 0
-
-        return 1
-
-    def submit_tags():
-        """
-        Handles hitting the "submit" button
-        """
-        new_window.destroy()
-
-    if n == 1:
-        tk.Label(new_window, text='We couldn\'t find the seed based on the tags provided!\n'
-                                  '\nPlease enter another tag!\n',
-                 justify='center', wraplength=new_window.winfo_width(),
-                 font=['Times New Roman', 20, 'bold']).pack(side='top')
-    else:
-        tk.Label(new_window, text='Press "Random" in the Character Selection Screen tag selection window 5 '
-                                  'times and type them into the following boxes!\n\nORDER MATTERS!\n',
-                 justify='center', wraplength=new_window.winfo_width(),
-                 font=['Times New Roman', 20, 'bold']).pack(side='top')
-
-    btn = tk.Button(text_frame, text="Submit", font=['Times New Roman', 15, 'bold'],
-                    justify='center', command=submit_tags)
-    btn.config(state='disabled')
-
-    btn.grid(row=2, column=int(n/2))
-
-    text_frame.pack()
-
-    new_window.wait_window()
-
-    if close:
-        return [], close
-
-    if n == 1:
-        return tags.index(svar[0].get()), close
-
-    rolled_tags = []
-    for tag in svar:
-        rolled_tags.append(tags.index(tag.get()))
-
-    return rolled_tags, close
-
-
-"""
-def get_monitor_from_coord(x, y):
-    
-    Unused method that would find the current monitor based on the x and y coordinates
-
-    :param: x: x coordinate of click
-    :param: y: y coordinate of click
-    
-    monitors = screeninfo.get_monitors()
-
-    for m in reversed(monitors):
-        if m.x <= x <= m.width + m.x and m.y <= y <= m.height + m.y:
-            return m
-    return monitors[0]
-"""
-
-def no_window_selected():
-    """
-    Give user dialogue that tells them that they need to select a window to use the program
-
-    :return: None
-    """
-    new_window = tk.Toplevel(window, width=200, height=750)
-    new_window.geometry(f"+{window.winfo_x() + 100}+{window.winfo_y() + 100}")
-    tk.Label(new_window, font={'Times New Roman', 20, 'bold'},
-             text=f'You have not selected a window yet!\n'
-                  f'Please select a window using the "Select Window" button').pack()
-
-
-def disable_children(widget):
-    """
-    Recursive function that disables every child widget within a widget.
-
-    :param widget: App widget, such as a listbox, button, window, etc.
-    :return: None
-    """
-    for child in widget.winfo_children():
-        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) \
-                or isinstance(child, tk.Menubutton) or isinstance(child, tk.Entry):
-            child.configure(state='disabled')
-        if isinstance(child, tk.Frame):
-            disable_children(child)
-
-
-def enable_children(widget):
-    """
-    Recursive function that enables every child widget within a widget.
-
-    :param widget: App widget, such as a listbox, button, window, etc.
-    :return: None
-    """
-    for child in widget.winfo_children():
-        if isinstance(child, tk.Button) or isinstance(child, tk.Listbox) \
-                or isinstance(child, tk.Menubutton) or isinstance(child, tk.Entry):
-            child.configure(state='normal')
-        if isinstance(child, tk.Frame):
-            enable_children(child)
 
 
 def hide_cur():
@@ -550,6 +29,123 @@ def hide_cur():
         trophies_frame.pack_forget()
     else:
         bonus_org_frame.pack_forget()
+
+
+def make_bonus_checker_windows():
+    from All_Trophies_App.All_Trophies_Image_Recognition.MyBonusChecker import on_click, get_output_on_clicks, \
+        finish_work
+    images = ['Images/First_Click.png', 'Images/Second_Click.png']
+    new_window = tk.Toplevel(window)
+    new_window.geometry(f"{int(window.winfo_width() * 4 / 5)}x{int(window.winfo_height() * 7 / 9)}")
+    center(new_window)
+    new_window.grab_set()
+    im_1 = ImageTk.PhotoImage(Image.open(images[0]))
+    im_2 = ImageTk.PhotoImage(Image.open(images[1]))
+
+    def get_two_click_coordinates():
+        """
+        Ensures that we get exactly two mouse clicks from the user and uses them to create an area in which
+        the program will take continuous screenshots
+
+        :return: The positions of the user's mouse clicks
+        """
+        nonlocal first_label
+        nonlocal second_label
+        nonlocal third_label
+        nonlocal fourth_label
+
+        button.config(state='disabled')
+
+        clicks = 0
+        print(f'Make a first click in the top left')
+        while clicks < 2:
+            with pynput.mouse.Listener(on_click=on_click) as listener:
+                listener.join()
+                first_label.configure(fg="black")
+                second_label.configure(fg="green")
+
+            clicks += 1
+
+        second_label.configure(fg="black")
+        third_label.configure(fg="green")
+        fourth_label.configure(fg="green")
+
+        output, top_left, bottom_right = get_output_on_clicks()
+
+        print(f'You clicked on monitor', output)
+
+        print(f'The found coordinates are: (', top_left[0], ',', top_left[1], ')',
+              'and (', bottom_right[0], ',', bottom_right[1], ')')
+
+        if output == -1:
+            print("Error")
+            print(top_left)
+            print(bottom_right)
+            # TODO: Show error window popup
+            return
+
+        t = threading.Thread(target=finish_work(output, top_left, bottom_right))
+        t.start()
+
+        def check_if_done():
+            if not t.is_alive():
+                new_window.destroy()
+            else:
+                schedule_check()
+
+        def schedule_check():
+            new_window.after(1000, check_if_done)
+
+        schedule_check()
+
+    def do_work():
+        t = threading.Thread(target=get_two_click_coordinates)
+        t.start()
+
+    text_frame = tk.Frame(new_window)
+    first_label = tk.Label(text_frame, text="First click on the top left of the bonuses (shown below)",
+                           font=['Times New Roman', 15, 'bold'],
+                           justify='center',
+                           wraplength=new_window.winfo_width()/4)
+    first_label.configure(fg="green")
+    first_label.grid(row=0, column=0)
+
+    second_label = tk.Label(text_frame, text="Next click on the bottom right of the final bonus on the screen "
+                                             "(shown below)",
+                            font=['Times New Roman', 15, 'bold'],
+                            justify='center',
+                            wraplength=new_window.winfo_width()/4)
+    second_label.grid(row=0, column=1)
+
+    third_label = tk.Label(text_frame, text="Scroll down on the bonuses until you reach the end! If you want to ensure "
+                                            "every bonus is gotten, scroll up after you hit the bottom!",
+                           font=['Times New Roman', 15, 'bold'],
+                           justify='center',
+                           wraplength=new_window.winfo_width()/4)
+    third_label.grid(row=0, column=2)
+
+    fourth_label = tk.Label(text_frame, text="Hit q to stop the bonus checker from updating, and the bonuses should "
+                                             "automatically update!",
+                            font=['Times New Roman', 15, 'bold'],
+                            justify='center',
+                            wraplength=new_window.winfo_width()/4)
+    fourth_label.grid(row=0, column=3)
+
+    image_frame = tk.Frame(new_window)
+
+    btn_frame = tk.Frame(new_window)
+    button = tk.Button(btn_frame, text="START", font=['Times New Roman', 15, 'bold'], justify='center',
+                       command=do_work)
+    button.pack()
+
+    for i in range(0, 4):
+        text_frame.grid_columnconfigure(i, weight=1, uniform="Text")
+        image_frame.grid_columnconfigure(i, weight=1, uniform="Text")
+
+    text_frame.pack()
+    btn_frame.pack()
+
+    new_window.wait_window()
 
 
 def open_bonuses():
@@ -834,7 +430,6 @@ def open_bonuses():
         """
         move_hidden()
         clear_listboxes()
-        disable_children(window)
         run_bonus_checker()
 
     def run_bonus_checker():
@@ -845,22 +440,13 @@ def open_bonuses():
         """
         from All_Trophies_App.All_Trophies_Image_Recognition.MyBonusChecker import main
 
-        label = tk.Label(auto_checker_frame, text="Checking Bonuses...")
-        label.pack(side='top')
-        check_bonuses_btn.config(state='disabled')
         t = threading.Thread(target=main)
         t.start()
 
-        def auto_complete_2():
-            enable_children(window)
-            fill_listboxes()
-            open_bonuses()
-
         def check_if_done():
             if not t.is_alive():
-                label.pack_forget()
-                check_bonuses_btn.config(state='normal')
-                auto_complete_2()
+                fill_listboxes()
+                open_bonuses()
             else:
                 schedule_check()
 
@@ -911,7 +497,6 @@ def open_bonuses():
                                  height=20,
                                  selectmode=tk.SINGLE)
 
-        bonuses_frame.grid_columnconfigure(0, weight=1, uniform="bonuses")
         bonuses_frame.grid_columnconfigure(1, weight=2, uniform="bonuses")
         bonuses_frame.grid_columnconfigure(2, weight=2, uniform="bonuses")
         bonuses_frame.grid_columnconfigure(3, weight=2, uniform="bonuses")
@@ -957,7 +542,7 @@ def open_bonuses():
         check_bonuses_btn.pack(side='bottom')
 
         middle.grid(row=1, column=2)
-        auto_checker_frame.grid(row=1, column=0)
+        auto_checker_frame.grid(row=0, column=2)
 
         left_frame.grid(row=0, column=1)
         right_frame.grid(row=0, column=3)
@@ -968,6 +553,472 @@ def open_bonuses():
         hide_cur()
         cur = 0
         bonuses_frame.pack()
+
+
+def roll_more_tags(n):
+    """
+    Handles displaying window that allows user to enter tags
+
+    :param: n: Number of tags for user to enter
+    """
+    tags = globals.TAGS
+    tag_bool = []
+    svar = []
+    close = False
+
+    def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
+        nonlocal close
+
+        close = True
+        win.destroy()
+
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.title("Record_first")
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
+    center(new_window)
+
+    text_frame = tk.Frame(new_window)
+
+    for i in range(n):
+        tag_bool.append(0)
+        var = tk.StringVar()
+        tk.Label(text_frame, text=f"Entry {i + 1}", font=['Times New Roman', 15, 'bold'],
+                 justify='center').grid(row=0, column=i)
+        text_frame.grid_columnconfigure(i, weight=1, uniform="text")
+        tk.Entry(text_frame, textvariable=var).grid(row=1, column=i)
+        svar.append(var)
+
+    if n == 1:
+        svar[0].trace('w', lambda *args: text_settings(svar[0], 0))
+    else:
+        svar[0].trace('w', lambda *args: text_settings(svar[0], 0))
+        svar[1].trace('w', lambda *args: text_settings(svar[1], 1))
+        svar[2].trace('w', lambda *args: text_settings(svar[2], 2))
+        svar[3].trace('w', lambda *args: text_settings(svar[3], 3))
+        svar[4].trace('w', lambda *args: text_settings(svar[4], 4))
+
+    def check_finish():
+        """
+        Checks if all tags are available to be submitted and turns on the "submit" button if they are
+        """
+        for num in tag_bool:
+            if num == 0:
+                btn.config(state='disabled')
+                return
+        btn.config(state='normal')
+
+    def text_settings(text, identifier):
+        """
+        Every time a text field is updated, this method is called and updates text settings
+
+        :param: text: text field that contains the inputted text
+        :param: identifier: number used to determine which text field is being used
+        """
+        if character_limit(text):
+            text.set(text.get().upper())
+
+        check_tag(text, identifier)
+
+    def check_tag(text, identifier):
+        """
+        Checks if the tag is in the "tags" array
+
+        :param: text: text field that contains the inputted text
+        :param: identifier: number used to determine which text field is being used
+        """
+        if len(text.get()) >= 2:
+            if text.get() in tags:
+                tag_bool[identifier] = 1
+                check_finish()
+                return
+
+        if tag_bool[identifier]:
+            tag_bool[identifier] = 0
+            check_finish()
+
+    def character_limit(text):
+        """
+        Enters characters into field in uppercase and disallows users from entering more than 4 characters
+
+        :param: text: text field that contains the inputted text
+        """
+        if len(text.get()) > 4:
+            text.set(text.get()[:-1].upper())
+            return 0
+
+        return 1
+
+    def submit_tags():
+        """
+        Handles hitting the "submit" button
+        """
+        new_window.destroy()
+
+    if n == 1:
+        tk.Label(new_window, text='We couldn\'t find the seed based on the tags provided!\n'
+                                  '\nPlease enter another tag!\n',
+                 justify='center', wraplength=new_window.winfo_width(),
+                 font=['Times New Roman', 20, 'bold']).pack(side='top')
+    else:
+        tk.Label(new_window, text='Press "Random" in the Character Selection Screen tag selection window 5 '
+                                  'times and type them into the following boxes!\n\nORDER MATTERS!\n',
+                 justify='center', wraplength=new_window.winfo_width(),
+                 font=['Times New Roman', 20, 'bold']).pack(side='top')
+
+    btn = tk.Button(text_frame, text="Submit", font=['Times New Roman', 15, 'bold'],
+                    justify='center', command=submit_tags)
+    btn.config(state='disabled')
+
+    btn.grid(row=2, column=int(n/2))
+
+    text_frame.pack()
+
+    new_window.wait_window()
+
+    if close:
+        return [], close
+
+    if n == 1:
+        return tags.index(svar[0].get()), close
+
+    rolled_tags = []
+    for tag in svar:
+        rolled_tags.append(tags.index(tag.get()))
+
+    return rolled_tags, close
+
+
+def fin_adv():
+    """
+    Handles the window that shows when every 1P only trophy is collected
+    """
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
+    center(new_window)
+
+    def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
+        win.destroy()
+
+    def submit():
+        """
+        Handles hitting the "submit" button
+        """
+        new_window.destroy()
+
+    frame = tk.Frame(new_window)
+
+    tk.Label(frame, text="You collected every trophy!\n\n",
+             font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
+
+    tk.Button(frame, text="Exit", command=submit).pack(side='bottom')
+
+    frame.pack()
+
+    new_window.wait_window()
+
+
+def display_adv(tags, trophy, goomba_trophies):
+    """
+    Handles displaying the window that shows user the trophies that can be acquired in an adventure run
+
+    :param: tags: list of tags user inputs
+    :param: trophy: the trophy that will spawn on the stage
+    :param: goomba_trophies: the trophy(ies) that can be acquired by jumping on goombas
+    """
+
+    trophies = globals.trophies
+    file = "Images/Image_Atlas.png"
+    photo = Image.open(file)
+    confirmed = [0]
+    close = False
+
+    def change_state(ind, txt):
+        nonlocal confirmed
+
+        if confirmed[ind]:
+            confirmed[ind] = 0
+            txt.config(background='white')
+        else:
+            confirmed[ind] = 1
+            txt.config(background='green')
+
+    def submit():
+        """
+        Handles hitting the "submit" button
+        """
+
+        new_window.destroy()
+
+    def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
+        nonlocal close
+
+        close = True
+        win.destroy()
+
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.title('Record')
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 5 / 9)}")
+    center(new_window)
+
+    text_frame = tk.Frame(new_window)
+    trophy_frame = tk.Frame(new_window)
+
+    tk.Label(text_frame, text="Click on trophies you collected! If the background is green, that means it is marked as"
+                              " collected!\n", font=['Times New Roman', 15, 'bold'],
+             justify='center').pack(side='top')
+
+    if len(tags) == 0:
+        text = 'Do not roll any tags!'
+    elif len(tags) <= 5:
+        text = f'Roll {len(tags)} tags!\nThe order of tags will be:\n'
+        for i in range(len(tags)):
+            if i != len(tags)-1:
+                text = f'{text}{tags[i]}, '
+            else:
+                text = f'{text}{tags[i]}'
+    else:
+        text = f'Roll {len(tags)} tags!\nThe final 5 tags will be:\n'
+        for i in range(len(tags)-5, len(tags), 1):
+            if i != len(tags) - 1:
+                text = f'{text}{tags[i]}, '
+            else:
+                text = f'{text}{tags[i]}'
+
+    tk.Label(text_frame, text=text, font=['Times New Roman', 15, 'bold'], justify='center').pack(side='top')
+
+    text_frame.pack(side='top')
+
+    frame_1 = tk.Frame(trophy_frame, width=250, height=300)
+    frame_1.grid(row=0, column=0)
+    text_stage = tk.Text(frame_1, font=['Times New Roman', 15, 'bold'])
+    text_stage.place(x=0, y=0, width=250, height=300)
+    text_stage.insert(tk.END, f"Stage trophy:\n{trophy}\n")
+
+    for i in range(len(trophies)):
+        if trophy == trophies[i][0]:
+            cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
+            cropped_im = photo.crop(cropped_rect)
+            im = ImageTk.PhotoImage(cropped_im)
+            text_stage.image_create(tk.END, image=im)
+            text_stage.image = im
+            break
+
+    if len(goomba_trophies) == 1:
+        frame_2 = tk.Frame(trophy_frame, width=250, height=300)
+        frame_2.grid_propagate(False)
+        frame_2.grid(row=0, column=1)
+        text_goomba = tk.Text(frame_2, font=['Times New Roman', 15, 'bold'])
+        text_goomba.place(x=0, y=0, width=250, height=300)
+        text_goomba.insert(tk.END, f"Possible Goomba Trophy:\n{goomba_trophies[0]}\n")
+
+        for i in range(len(trophies)):
+            if goomba_trophies[0] == trophies[i][0]:
+                cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
+                cropped_im = photo.crop(cropped_rect)
+                im_2 = ImageTk.PhotoImage(cropped_im)
+                text_goomba.image_create(tk.END, image=im_2)
+                text_goomba.image = im_2
+                confirmed.append(0)
+                break
+
+        text_goomba.bind("<Button-1>", lambda *args: change_state(1, text_goomba))
+    elif len(goomba_trophies) == 2:
+        frame_2 = tk.Frame(trophy_frame, width=250, height=300)
+        frame_2.grid(row=0, column=1)
+        text_goomba_1 = tk.Text(frame_2, font=['Times New Roman', 15, 'bold'])
+        text_goomba_1.place(x=0, y=0, width=250, height=300)
+        text_goomba_1.insert(tk.END, f"Possible Goomba Trophy:\n{goomba_trophies[0]}\n")
+
+        frame_3 = tk.Frame(trophy_frame, width=250, height=300)
+        frame_3.grid(row=0, column=2)
+        text_goomba_2 = tk.Text(frame_3, font=['Times New Roman', 15, 'bold'])
+        text_goomba_2.place(x=0, y=0, width=250, height=300)
+        text_goomba_2.insert(tk.END, f"Possible Goomba Trophy:\n{goomba_trophies[1]}\n")
+
+        num = 0
+
+        for i in range(len(trophies)):
+            if goomba_trophies[0] == trophies[i][0]:
+                cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
+                cropped_im = photo.crop(cropped_rect)
+                im_2 = ImageTk.PhotoImage(cropped_im)
+                text_goomba_1.image_create(tk.END, image=im_2)
+                text_goomba_1.image = im_2
+                num += 1
+                confirmed.append(0)
+                if num == 2:
+                    break
+
+            if goomba_trophies[1] == trophies[i][0]:
+                cropped_rect = ((i % 16) * 250, int(i / 16) * 300, (i % 16) * 250 + 250, int(i / 16) * 300 + 300)
+                cropped_im = photo.crop(cropped_rect)
+                im_3 = ImageTk.PhotoImage(cropped_im)
+                text_goomba_2.image_create(tk.END, image=im_3)
+                text_goomba_2.image = im_3
+                num += 1
+                confirmed.append(0)
+                if num == 2:
+                    break
+
+        text_goomba_1.bind("<Button-1>", lambda *args: change_state(1, text_goomba_1))
+        text_goomba_2.bind("<Button-1>", lambda *args: change_state(2, text_goomba_2))
+
+    tk.Button(new_window, text="Submit", font=['Times New Roman', 15, 'bold'],
+              justify='center', command=submit).pack(side='bottom')
+
+    text_stage.bind("<Button-1>", lambda *args: change_state(0, text_stage))
+
+    trophy_frame.pack(side='bottom')
+
+    new_window.wait_window()
+
+    if close:
+        return [], close
+
+    results = []
+    for i in range(len(confirmed)):
+        if i == 0:
+            if confirmed[0]:
+                results.append(trophy)
+        if i == 1:
+            if confirmed[1]:
+                results.append(goomba_trophies[0])
+        if i == 2:
+            if confirmed[2]:
+                results.append(goomba_trophies[1])
+
+    return results, close
+
+
+def display_birdo(tags, num_coins, num_steps):
+    """
+    Handles displaying the window that shows user necessary information to obtain the Birdo trophy
+
+    :param: tags: list of tags user inputs
+    :param: num_coins: the number of coins the user needs to input into the lottery
+    :param: num_steps: the number of times the "random" button needs to be hit on name selection screen
+    :return:
+    """
+    index = 94
+    file = "Images/Image_Atlas.png"
+    photo = Image.open(file)
+    close = False
+    confirmed = 0
+
+    def submit():
+        """
+        Handles user clicking "not found" button
+        """
+
+        new_window.destroy()
+
+    def submit_confirm():
+        """
+        Handles user clicking "found" button
+        """
+        nonlocal confirmed
+
+        confirmed = 1
+        globals.updated = True
+        new_window.destroy()
+
+    def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
+        nonlocal close
+
+        close = True
+        win.destroy()
+
+    def change_text():
+        """
+        Unimplemented method that will dynamically update the text on screen
+        """
+        nonlocal num_steps
+        if num_steps > 0:
+            num_steps -= 1
+        add_text()
+
+    def add_text():
+        """
+        Helper method that changes text on screen
+        """
+        nonlocal label
+
+        if len(tags) == 0:
+            text = 'Do not roll more tags!\n'
+        elif len(tags) <= 5:
+            text = f'Roll {num_steps} more tags!\nThe order of tags will be:\n'
+            for i in range(len(tags)):
+                if i != len(tags) - 1:
+                    text = f'{text}{tags[i]}, '
+                else:
+                    text = f'{text}{tags[i]}'
+        else:
+            text = f'Roll {num_steps} more tags!\nThe final 5 tags will be:\n'
+            for i in range(len(tags) - 5, len(tags), 1):
+                if i != len(tags) - 1:
+                    text = f'{text}{tags[i]}, '
+                else:
+                    text = f'{text}{tags[i]}'
+
+        label.config(text=f'{text}\n'
+                          f'When you have made it to the end, '
+                          f'go to the lottery and spend {num_coins} coins!\n')
+
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.title("Record")
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry(f"{int(window.winfo_width() * 3 / 5)}x{int(window.winfo_height() * 7 / 11)}")
+    center(new_window)
+
+    text_frame = tk.Frame(new_window)
+    trophy_frame = tk.Frame(new_window, width=250, height=300)
+    button_frame = tk.Frame(new_window)
+
+    label = tk.Label(text_frame, text="",
+                     font=['Times New Roman', 15, 'bold'],
+                     justify='center')
+
+    add_text()
+    label.pack()
+
+    cropped_rect = ((index % 16) * 250, int(index / 16) * 300, (index % 16) * 250 + 250, int(index / 16) * 300 + 300)
+    cropped_im = photo.crop(cropped_rect)
+    im = ImageTk.PhotoImage(cropped_im)
+    birdo_img = tk.Text(trophy_frame, font=['Times New Roman', 15, 'bold'])
+    birdo_img.image_create(tk.END, image=im)
+    birdo_img.image = im
+
+    tk.Button(button_frame, text="Found", command=submit_confirm).pack(side='left')
+    tk.Button(button_frame, text="Not Found", command=submit).pack(side='left')
+
+    birdo_img.place(x=0, y=0, width=250, height=300)
+    text_frame.grid(row=0)
+    trophy_frame.grid(row=1)
+    button_frame.grid(row=2)
+    new_window.grid_columnconfigure(0, weight=1)
+
+    new_window.wait_window()
+
+    return confirmed, close
 
 
 def open_trophies():
@@ -1093,8 +1144,6 @@ def open_trophies():
 
         confirmed = main(owned_trophies)
 
-        enable_children(window)
-
         for trophy in confirmed:
             i = uncollected.get(0, tk.END).index(trophy)
             index, trophies_index, _ = get_index(collected, trophy)
@@ -1102,34 +1151,6 @@ def open_trophies():
             collected.itemconfig(index, {'bg': 'green'})
             uncollected.delete(i)
             trophies[trophies_index][1] = 1
-
-    def clear_listboxes():
-        """
-        Remove all listbox entries from both listboxes
-
-        :return: None
-        """
-        nonlocal hidden_left
-        nonlocal hidden_right
-        nonlocal collected
-        nonlocal uncollected
-        nonlocal move_col
-        nonlocal move_un
-        nonlocal l_search
-        nonlocal l_search_query
-        nonlocal r_search
-        nonlocal r_search_query
-
-        collected.delete(0, tk.END)
-        uncollected.delete(0, tk.END)
-        move_col.delete(0, tk.END)
-        move_un.delete(0, tk.END)
-        hidden_left = []
-        hidden_right = []
-        l_search_query.set("")
-        r_search_query.set("")
-        l_search = []
-        r_search = []
 
     def fill_listboxes():
         """
@@ -1228,7 +1249,7 @@ def open_trophies():
             else:
                 uncollected.insert(index, move_col.get(0))
                 if not lotto:
-                    uncollected.itemconfig(index, {'bg':'green'})
+                    uncollected.itemconfig(index, {'bg': 'green'})
             trophies[trophies_index][1] = 0
             move_col.delete(0)
 
@@ -1515,7 +1536,6 @@ def open_trophies():
                                  height=20,
                                  selectmode=tk.SINGLE)
 
-        trophies_frame.grid_columnconfigure(0, weight=1, uniform="trophies")
         trophies_frame.grid_columnconfigure(1, weight=2, uniform="trophies")
         trophies_frame.grid_columnconfigure(2, weight=2, uniform="trophies")
         trophies_frame.grid_columnconfigure(3, weight=2, uniform="trophies")
@@ -1555,7 +1575,7 @@ def open_trophies():
         # check_trophies_btn.pack(side='top')
 
         middle.grid(row=1, column=2)
-        auto_checker_frame.grid(row=1, column=0)
+        auto_checker_frame.grid(row=0, column=2)
 
         left_frame.grid(row=0, column=1)
         right_frame.grid(row=0, column=3)
@@ -1566,16 +1586,3 @@ def open_trophies():
         hide_cur()
         cur = 1
         trophies_frame.pack()
-
-
-def adjust_bonuses():
-    global cur
-
-    if not booleans[2]:
-        # bg = "#100817"
-        # fg = "#ffffff"
-
-        booleans[2] = 2
-
-    hide_cur()
-    cur = 2

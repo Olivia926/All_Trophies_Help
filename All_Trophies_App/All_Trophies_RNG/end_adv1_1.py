@@ -141,6 +141,9 @@ def main(owned_trophies):
                     del potential_seed[b]
             """
 
+        if break_flag:
+            break
+
         # At this point, we've figured out what the seed is.
         # Now we want to find an ideal seed.
         # print('Found the current seed, calculating ideal seed...')

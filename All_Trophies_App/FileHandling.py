@@ -38,6 +38,10 @@ def open_file_work(file):
         trophies[tro_ind][1] = int(c)
         tro_ind += 1
 
+    reset_everything()
+
+
+def reset_everything():
     globals.finished_updating = True
 
     open_bonuses()

@@ -23,8 +23,6 @@ def open_cur():
         abf.open_bonuses()
     elif cur == 1:
         abf.open_trophies()
-    else:
-        abf.adjust_bonuses()
 
 
 def create_frames():
@@ -52,11 +50,6 @@ def create_frames():
                              activebackground=ab, activeforeground=af)
     trophies_btn.pack(side='left')
 
-    bonuses_sort = tk.Button(frame, text="Organize Bonuses", font=font, padx=20,
-                             command=abf.adjust_bonuses, bg=bg, fg=fg,
-                             activebackground=ab, activeforeground=af)
-    bonuses_sort.pack(side='left')
-
     frame.pack()
 
 
@@ -73,22 +66,22 @@ def create_menus():
 
     window.config(menu=menu)
     menu.add_cascade(label="File", menu=file_menu)
-    file_menu.add_command(label="New", command=do_thing)
+    file_menu.add_command(label="New", command=adf.new_file)
     file_menu.add_command(label="Open", command=adf.open_file)
     file_menu.add_command(label="Save", command=adf.save_file)
     file_menu.add_command(label="Save As", command=adf.save_as_file)
 
     menu.add_cascade(label="Resources", menu=resources_menu)
-    resources_menu.add_command(label="Livesplit", command=do_thing)
-    resources_menu.add_command(label="Livesplit Accessories", command=do_thing)
-    resources_menu.add_command(label="Autosplit", command=do_thing)
-    resources_menu.add_command(label="Autosplit Accessories", command=do_thing)
-    resources_menu.add_command(label="Run Document", command=do_thing)
-    resources_menu.add_command(label="Speedster Excel Sheet", command=do_thing)
-    resources_menu.add_command(label="Leaderboard", command=do_thing)
+    resources_menu.add_command(label="Livesplit", command=lambda *args: adf.open_website(0))
+    resources_menu.add_command(label="Livesplit Accessories and Tips", command=lambda *args: adf.open_website(1))
+    resources_menu.add_command(label="Autosplit", command=lambda *args: adf.open_website(2))
+    resources_menu.add_command(label="Autosplit Accessories and Tips", command=lambda *args: adf.open_website(3))
+    resources_menu.add_command(label="Run Document", command=lambda *args: adf.open_website(4))
+    resources_menu.add_command(label="Speedster Excel Sheet", command=lambda *args: adf.open_website(5))
+    resources_menu.add_command(label="Bonuses Excel Sheet", command=lambda *args: adf.open_website(6))
+    resources_menu.add_command(label="Leaderboard", command=lambda *args: adf.open_website(7))
 
     menu.add_cascade(label="Help", menu=help_menu)
-    help_menu.add_command(label="View Help", command=do_thing)
     help_menu.add_command(label="About", command=do_thing)
     help_menu.add_command(label="View Updates", command=do_thing)
     help_menu.add_command(label="Contact Information", command=do_thing)
@@ -107,16 +100,39 @@ def create_window():
     window.protocol("WM_DELETE_WINDOW", lambda: close_window())
 
     def close_window():
+        """
+        Handles closing the main window
+
+        :return: None
+        """
         destroy = True
 
         def save(win):
+            """
+            Handles the save button
+
+            :param: win: toplevel window
+            :return: None
+            """
             adf.save_file()
             win.destroy()
 
         def exit_window(win):
+            """
+            Handles hitting the exit without saving button
+
+            :param: win: toplevel window
+            :return: None
+            """
             win.destroy()
 
         def cancel(win):
+            """
+            Handles the cancel button and user closing the window
+
+            :param: win: toplevel window
+            :return: None
+            """
             nonlocal destroy
 
             destroy = False
@@ -124,6 +140,7 @@ def create_window():
 
         if globals.updated:
             new_window = tk.Toplevel(window)
+            new_window.grab_set()
             new_window.title("Record")
             new_window.geometry('400x100')
 

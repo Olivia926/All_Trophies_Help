@@ -11,6 +11,7 @@ def center(win):
     Centers a tkinter window
 
     :param win: the window to center
+    :return: None
     """
     global window
 
@@ -18,7 +19,7 @@ def center(win):
     width = win.winfo_width()
     height = win.winfo_height()
     x = int(window.winfo_rootx() + (window.winfo_width() // 2) - (width // 2))
-    y = int(window.winfo_rooty() + (window.winfo_height() // 2) - (height // 1.5))
+    y = int(window.winfo_rooty() + (window.winfo_height() // 2) - (height // 2))
     win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
     win.deiconify()
 
@@ -110,7 +111,7 @@ trophies = [['Freezie', 0, 0, 'Item'], ['Parasol', 0, 0, 'Item'], ['Screw Attack
             ['Master Sword', 0, 0, 'Zelda'], ['Balloon Fighter', 0, 1, 'Zelda'], ['Kensuke Kimachi', 0, 1, 'Zelda'],
             ['Kirby Hat 3', 0, 1, 'Zelda'], ['Stanley', 0, 1, 'Zelda'], ['Like Like', 0, 0, 'Birdo'],
             ['ReDead', 0, 0, 'Birdo'], ['Birdo', 0, 1, 'Birdo'], ['Polar Bear', 0, 1, 'Birdo'],
-            ['Four Giants', 0, 0, 'Giants'], ['Barrel Cannon', 0, 0, 'Giants'], ['Octorok', 0, 0, 'Octorok'],
+            ['Four Giants', 0, 0, 'Giants'], ['Barrel Cannon', 0, 1, 'Giants'], ['Octorok', 0, 0, 'Octorok'],
             ['Viruses', 0, 0, 'Sick'], ['Heririn', 0, 1, 'Sick'], ['Racing Kart', 0, 1, 'Sick'],
             ['Dr. Stewart', 0, 1, 'Hats'], ['Kirby Hat 1', 0, 1, 'Hats'], ['Kirby Hat 2', 0, 1, 'Hats'],
             ['Metal Mario', 0, 1, 'Hats'], ['Andross', 0, 1, 'Villains'], ['Andross 64', 0, 1, 'Villains'],
