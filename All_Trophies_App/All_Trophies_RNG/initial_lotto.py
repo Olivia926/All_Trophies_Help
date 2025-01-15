@@ -1,447 +1,488 @@
-# Original work by Savestate
-# Some of this code is adapted from gainge aka Judge9
+import copy
+from All_Trophies_App.All_Trophies_RNG.tagrss import TagRss
+from globals import TAGS
 
-from typing import Optional
+add_trophies = []
 
-# The following global values and constants are provided by Savestate, and the functions are slightly adapted from Savestate and Judge9
-#@804d5f90
-rng = 0x00000001
-a = 214013
-c = 2531011
-m = 4294967295
+TAGS_DICT = {"AAAA": 0, "1DER": 1, "2BIT": 2, "2L8": 3, "2PAY": 4, "401K": 5, "4BDN": 6, "4BY4": 7, "4EVA": 8,
+             "7HVN": 9, "AOK": 10, "ARCH": 11, "ARN": 12, "ASH": 13, "BAST": 14, "BBBB": 15, "BCUZ": 16, "BETA": 17,
+             "BOBO": 18, "BOMB": 19, "BONE": 20, "BOO": 21, "BORT": 22, "BOZO": 23, "BUB": 24, "BUD": 25, "BUZZ": 26,
+             "BYRN": 27, "CHUM": 28, "COOP": 29, "CUBE": 30, "CUD": 31, "DAYZ": 32, "DIRT": 33, "DIVA": 34, "DNCR": 35,
+             "DUCK": 36, "DUD": 37, "DUFF": 38, "DV8": 39, "ED": 40, "ELBO": 41, "FAMI": 42, "FIDO": 43, "FILO": 44,
+             "FIRE": 45, "FLAV": 46, "FLEA": 47, "FLYN": 48, "GBA": 49, "GCN": 50, "GLUV": 51, "GR8": 52, "GRIT": 53,
+             "GRRL": 54, "GUST": 55, "GUT": 56, "HAMB": 57, "HAND": 58, "HELA": 59, "HEYU": 60, "HI5": 61, "HIKU": 62,
+             "HOOD": 63, "HYDE": 64, "IGGY": 65, "IKE": 66, "IMPA": 67, "JAZZ": 68, "JEKL": 69, "JOJO": 70, "JUNK": 71,
+             "KEY": 72, "KILA": 73, "KITY": 74, "KLOB": 75, "KNEE": 76, "L33T": 77, "L8ER": 78, "LCD": 79, "LOKI": 80,
+             "LULU": 81, "MAC": 82, "MAMA": 83, "ME": 84, "MILO": 85, "MIST": 86, "MOJO": 87, "MOSH": 88, "NADA": 89,
+             "ZZZZ": 90, "NAVI": 91, "NELL": 92, "NEWT": 93, "NOOK": 94, "NEWB": 95, "ODIN": 96, "OLAF": 97, "OOPS": 98,
+             "OPUS": 99, "PAPA": 100, "PIT": 101, "POP": 102, "PKMN": 103, "QTPI": 104, "RAM": 105, "RNDM": 106,
+             "ROBN": 107, "ROT8": 108, "RUTO": 109, "SAMI": 110, "SET": 111, "SETI": 112, "SHIG": 113, "SK8R": 114,
+             "SLIM": 115, "SMOK": 116, "SNES": 117, "SNTA": 118, "SPUD": 119, "STAR": 120, "THOR": 121, "THUG": 122,
+             "TIRE": 123, "TLOZ": 124, "TNDO": 125, "TOAD": 126, "TOMM": 127, "UNO": 128, "VIVI": 129, "WALK": 130,
+             "WART": 131, "WARZ": 132, "WITH": 133, "YETI": 134, "YNOT": 135, "ZAXO": 136, "ZETA": 137, "ZOD": 138,
+             "ZOE": 139, "WORM": 140, "GEEK": 141, "DUDE": 142, "WYRN": 143, "BLOB": 144}
 
-def get_rng() -> int:
-    global rng
-    return rng
+TROPHIES_1PL_LOT = [['Ray Gun', True], ['Super Scope', True], ['Fire Flower', True], ['Star Rod', True],
+                    ['Home-Run Bat', True], ['Fan', True], ['Red Shell', False], ['Flipper', True],
+                    ['Mr. Saturn', True], ['Bob-omb', True], ['Super Mushroom', True], ['Starman 64', True],
+                    ['Barrel Cannon', True], ['Party Ball', True], ['Crate', True], ['Barrel', True], ['Capsule', True],
+                    ['Egg', True], ['Squirtle', True], ['Blastoise', True], ['Clefairy', True], ['Weezing', True],
+                    ['Chansey', False], ['Goldeen', True], ['Snorlax', True], ['Chikorita', True], ['Cyndaquil', True],
+                    ['Bellossom', True], ['Wobbuffet', True], ['Scizor', True], ['Porygon2', True], ['Toad', True],
+                    ['Coin', True], ['Kirby Hat 1', True], ['Kirby Hat 2', True], ['Kirby Hat 3', True],
+                    ['Lakitu', True], ['Birdo', True], ['Klap Trap', True], ['Slippy Toad', True],
+                    ['Koopa Troopa', True], ['Topi', True], ['Metal Mario', True], ['Daisy', True], ['Thwomp', True],
+                    ['Bucket', True], ['Racing Kart', True], ['Baby Bowser', True], ['Raphael Raven', True],
+                    ['Dixie Kong', False], ['Dr. Stewart', True], ['Jody Summer', True], ['Andross 64', True],
+                    ['Metroid', True], ['Ridley', True], ['Fighter Kirby', False], ['Ball Kirby', True],
+                    ['Waddle Dee', True], ['Rick', True], ['Jeff', False], ['Starman EB', True], ['Bulbasaur', True],
+                    ['Poliwhirl', True], ['Eevee', False], ['Totodile', True], ['Crobat', True], ['Igglybuff', True],
+                    ['Steelix', True], ['Heracross', True], ['Professor Oak', False], ['Misty', False],
+                    ['ZERO-ONE', True], ['Maruo Maruhige', False], ['Ryota Hayami', True], ['Ray Mk II', False],
+                    ['Heririn', True], ['Excitebike', True], ['Ducks', True], ['Bubbles', False],
+                    ['Eggplant Man', False], ['Balloon Fighter', True], ['Dr. Wright', True], ['Donbe & Hikari', True],
+                    ['Monster', True]]
 
-def set_rng(val: int) -> None :
-    global rng
-    rng = val
+DSTAR = {1: [675975949, 2727824503],
+         2: [-191841887, 2115878600],
+         3: [-2157176827, 2531105853],
+         4: [1084380025, 2165923046],
+         5: [-389939651, 586225427],
+         6: [-605770863, 3109564500],
+         7: [-3310955595, 3566711417],
+         8: [-1422735383, 2234209426],
+         9: [-1492584851, 2784856047],
+         10: [-762265983, 2186156320],
+         11: [-3133008795, 3255514357],
+         12: [896611673, 2974409086],
+         13: [-2201834595, 4082973451],
+         14: [2963202673, 1172243756],
+         15: [191990293, 2947833777],
+         16: [-668333111, 3265965994],
+         17: [-811643443, 2952203367],
+         18: [2226784097, 763478136],
+         19: [3798852805, 152809133],
+         20: [-727532743, 3073944342]}
 
-# LCG:
-# a = 214013
-# c = 2531011
-# m = 2^32 - 1 -> cuz im using & instead of %, which makes the program more optimized, (thanks to TauKhan for the tip!!)
-# Inputs:
-# `@custom` is an int passed in to compute the next rng value after the custom value, unsaved. Defaults to -1, which will use the actual rng value and save it.
-def next_rng(custom_rng_val: int = -1) -> int:
-    if custom_rng_val == -1:
-        global rng
-        rng = (a*rng + c) & m
-        return rng
-    else:
-        ret = (a*custom_rng_val + c) & m
-        return ret
 
-def get_rand_int(i: int, adv = True) -> int:
-    temp_rng = next_rng() if adv else get_rng()
-    top_bits = temp_rng >> 16
-    return (i*top_bits) >> 16
+def get_trophies(base_trophy_set, user_trophies):
+    trophies = base_trophy_set
 
-def get_rand_float() -> int:
-    temp_rng = next_rng()
-    top_bits = temp_rng >> 16
-    return top_bits / 65536
-
-# this function is adapted from judge9
-def rng_diff(src: int, tgt: int) -> int:
-    if src == tgt:
-        return 0
-    
-    step = 0
-    temp_src = src
-    temp_tgt = tgt
-    
-    while temp_src != tgt and temp_tgt != src:
-        temp_src = next_rng(temp_src)
-        temp_tgt = next_rng(temp_tgt)
-        step += 1
-    
-    return step if temp_src == tgt else -1 * step
-
-# The following functions are all made by myself.
-# The code in the `old_code.py.example` file is a mix of my own and some from judge9.
-
-def get_hex(tgt: Optional[int] = None) -> int:
-    while True:
-        # Get initial input
-        val = input("Source RNG value: ") if tgt is not None else input("Target RNG value: ")
-        val = val.replace(" ", "")
-        
-        if val.lower() == 'q': # Escape option
-            print("Exiting.")
-            quit(0)
-        elif val.lower() == 'c' and tgt is not None: # Continue by using old tgt as new src
-            if tgt == -1:
-                print("Cannot continue off of previous value because you just started.")
-            else:
-                return tgt
-        else:
-            try:
-                return int(val, 16)
-            except ValueError:
-                print(f'Invalid input: \'{val}\'.')
-
-def use_coin() -> int:
-    # This looks funny, but we're returning the rng value generated here at the end.
-    next_rng()
-    next_rng()
-    return next_rng()
-
-# this function helps to compute the coefficient and constant for a variable number of steps in the LCG without having to call `advance_seed()` a bunch
-# this way, i can just hard-code numbers instead of doing the super long modular arithmetic that i did in an earlier version
-# also this is all thanks to TauKhan again because i couldn't understand how the linear transformations worked hehe :))))
-# inputs:
-#   `s` = seed
-#   `i` = number of times that the seed should be advanced
-# returns: an integer
-# how to use: 
-#   coefficient = advance_star(1, i) - advance_star(0, i)
-#   constant = advance_star(0, i)
-def advance_star(s: int, i: int) -> int:
-    # numbers grabbed from the LCG function at the top of the file
-    for _ in range(i):
-        s = (214013 * s + 2531011) & 4294967295
-    
-    return s
-
-# Lottery simulator
-def lotto_sim(num_owned_trophies: int, num_remaining_1p_lotto: int, src: int, trophies: list[list[str, int, bool]]) -> None:
-    NUM_AVAILABLE_TROPHIES = 84
-    set_rng(src)
-    
-    # Overall stats
-    total_coins = 0
-    resets = 0
-    
-    # Now we can start the lottery simulation.
-    print(f'Beginning lottery simulation with seed {hex(src)}')
-    while num_remaining_1p_lotto > 0:
-        # The purpose of the first call is just to randomize the position of the coin animation as it decreases to 00.
-        get_rand_int(15)
-        
-        # Setting up variables to be used in the coin loop
-        temp_rng = src = get_rng()
-        coins = 0
-        first_outcome_index = -1
-        
-        # The coin loop; determines how many coins to use to 1) get a trophy and 2) ensure that the trophy is in the 1p/lotto category
-        while True:
-            coins += 1
-            
-            # If we have to use more than 20 coins, just spend one to update the rng value and move on.
-            if coins > 20:
-                # Updating counters
-                resets += 1
-                total_coins += 1
-                
-                # Because we're just going to spend one coin, we can use the pre-computed first outcome.
-                if first_outcome_index == -1:
-                    print(f'Reset #{resets}. No ideal outcome. Just spend 1 coin to get a dupe trophy.')
-                else:
-                    print(f'Reset #{resets}. No ideal outcome. Just spend 1 coin to get '
-                          f'{trophies[first_outcome_index][0]}')
-                    trophies[first_outcome_index][1] = 0
-                    num_owned_trophies += 1
-                # Now we want to spend the one coin.
-                # Before we can do that, remember that we already advanced the rng by a total of 20 coins.
-                # So we need to reset our rng to the correct position.
-                set_rng(src)
-                use_coin()
-                next_rng()
-                next_rng()
+    for trophy in user_trophies:
+        for i in range(len(trophies)):
+            if trophies[i][0] == trophy:
+                trophies.remove(trophies[i])
                 break
-
-            # set rng to be src each time at the beginning
-            set_rng(temp_rng)
-            
-            # 3 steps are called per coin. 
-            temp_rng = use_coin()
-            
-            # Now the game determines whether this roll is sucessful or not. This changes depending on the following formula
-            success_roll = get_rand_int(100)
-            rem_trophies = NUM_AVAILABLE_TROPHIES - num_owned_trophies
-            chance = int((rem_trophies / NUM_AVAILABLE_TROPHIES) * 100)
-            if success_roll < chance:
-                # In this case, we get a new trophy.
-                trophy_roll_rand_int = get_rand_int(rem_trophies)
-                # The actual trophy that we roll is found by only counting through trophies that we dont have owned.
-                # For example, if we roll `15` (0-indexed), then the actual trophy that we get is not just the `15`th trophy (0-indexed), but it's the `15`th (0-indexed) *unowned* trophy.
-                # We'll use `trophy_roll_actual_index` to store the actual index of the trophy that we roll in the big Trophies list above.
-                # And we'll reuse `trophy_roll_rand_int` as a counter to let us know when we've gone through that number of unowned trophies.
-                trophy_roll_actual_index = -1
-                for t in trophies:
-                    trophy_roll_actual_index += 1
-                    if t[1] == 1:
-                        trophy_roll_rand_int -= 1
-                        if trophy_roll_rand_int == -1:
-                            break
-                # At the end of this loop, `trophy_roll_actual_index` should give us the index of the trophy in the big
-                # Trophies list that we actually rolled, and not just `get_rand_int(x)`.
-                # If the boolean field in the trophies tuple is True and it is not owned, then we want to use this
-                # number of coins.
-                if trophies[trophy_roll_actual_index][2] and trophies[trophy_roll_actual_index][1] == 1:
-                    print(f'{coins} -> {trophies[trophy_roll_actual_index][0]}')
-                    # Mark that we now own the trophy and update counters.
-                    trophies[trophy_roll_actual_index][1] = 0
-                    num_owned_trophies += 1
-                    num_remaining_1p_lotto -= 1
-                    total_coins += coins
-                    break
-                elif coins == 1:
-                    first_outcome_index = trophy_roll_actual_index
-                # Note that we don't use an else case here, because we did not get a trophy in the 1p/lotto category,
-                # so we loop again.
-            # Similarly, we don't use an else case here because we did not get a new trophy, so we loop again.
-        # Now, the game advances the RNG one more time to determine the pose of the received trophy.
-        next_rng()
-    
-    print('-------------------------------')
-    print('Results')
-    print('-------------------------------')
-    print(f'Total trophies collected: {num_owned_trophies}')
-    print(f'Total number of resets: {resets}')
-    print(f'Total coins spent {total_coins}')
-
-# Simple function to append to a string depending on some trophy flags
-def trophy_str(t: list[str, int, bool]) -> str:
-    ret = f'- {t[0]} '
-    if t[1] == 0:
-        ret += f' (owned)|'
-    else:
-        ret += f' (new)|'
-    return ret
-
-def pmain():
-    # Initial trophy list: [trophy_name, not_owned=1/owned=0]
-    trophies = [['Ray Gun', 1], ['Super Scope', 1], ['Fire Flower', 1], ['Star Rod', 1], ['Home-Run Bat', 1],
-                ['Fan', 1], ['Hammer', 1], ['Red Shell', 1], ['Flipper', 1], ['Mr. Saturn', 1], ['Bob-omb', 1],
-                ['Super Mushroom', 1], ['Poison Mushroom', 1], ['Starman 64', 1], ['Cloaking Device', 1],
-                ['Barrel Cannon', 1], ['Party Ball', 1], ['Crate', 1], ['Barrel', 1], ['Capsule', 1], ['Egg', 1],
-                ['Poké Ball', 1], ['Venusaur', 1], ['Squirtle', 1], ['Blastoise', 1], ['Clefairy', 1], ['Weezing', 1],
-                ['Chansey', 1], ['Goldeen', 1], ['Snorlax', 1], ['Articuno', 1], ['Zapdos', 1], ['Moltres', 1],
-                ['Chikorita', 1], ['Cyndaquil', 1], ['Togepi', 1], ['Bellossom', 1], ['Wobbuffet', 1], ['Scizor', 1],
-                ['Porygon2', 1], ['Raikou', 1], ['Suicune', 1], ['Lugia', 1], ['Ho-oh', 1], ['Toad', 1], ['Coin', 1],
-                ['Megavitamins', 1], ['Kirby Hat 1', 1], ['Kirby Hat 2', 1], ['Kirby Hat 3', 1],
-                ['Princess Peach\'s Castle', 1], ['Lakitu', 1], ['Pidgit', 1], ['Birdo', 1], ['Klap Trap', 1],
-                ['Shy Guys', 1], ['Pak E. Derm', 1], ['Tingle', 1], ['Moon', 1], ['Turtle', 1], ['Arwing', 1],
-                ['Great Fox', 1], ['Peppy Hare', 1], ['Slippy Toad', 1], ['Chozo Statue', 1], ['Whispy Woods', 1],
-                ['Fountain of Dreams', 1], ['Pokémon Stadium', 1], ['Koopa Troopa', 1], ['Topi', 1], ['Polar Bear', 1],
-                ['Metal Mario', 1], ['Daisy', 1], ['Thwomp', 1], ['Boo', 1], ['Bucket', 1], ['Racing Kart', 1],
-                ['Baby Mario', 1], ['Baby Bowser', 1], ['Raphael Raven', 1], ['Dixie Kong', 1], ['King K. Rool', 1],
-                ['Ocarina of Time', 1], ['Samurai Goroh', 1], ['Dr. Stewart', 1], ['Jody Summer', 1], ['Andross', 1],
-                ['Andross 64', 1], ['Metroid', 1], ['Ridley', 1], ['Fighter Kirby', 1], ['Ball Kirby', 1],
-                ['Waddle Dee', 1], ['King Dedede', 1], ['Rick', 1], ['Gooey', 1], ['Meta-Knight', 1], ['Jeff', 1],
-                ['Poo', 1], ['Starman EB', 1], ['Bulbasaur', 1], ['Poliwhirl', 1], ['Ditto', 1], ['Eevee', 1],
-                ['Totodile', 1], ['Crobat', 1], ['Igglybuff', 1], ['Steelix', 1], ['Heracross', 1],
-                ['Professor Oak', 1], ['Misty', 1], ['ZERO-ONE', 1], ['Maruo Maruhige', 1], ['Ryota Hayami', 1],
-                ['Kensuke Kimachi', 1], ['Hate Giant', 1], ['Ray Mk II', 1], ['Bayonette', 1], ['Annie', 1],
-                ['Totakeke', 1], ['Heririn', 1], ['Alpha', 1], ['Vacuum Luigi', 1], ['Pikmin', 1],
-                ['Excitebike', 1], ['Ducks', 1], ['Bubbles', 1], ['Eggplant Man', 1], ['Balloon Fighter', 1],
-                ['Stanley', 1], ['Dr. Wright', 1], ['Donbe & Hikari', 1], ['Monster', 1]]
-
-    Extras = [[71, ['Raccoon Mario', 1]], [72, ['Waluigi', 1]],
-              [74, ['Koopa Clown Car', 1]], [len(trophies), ['GCN', 1]]]
-
-    #TODO:
-    # Ask user for total trophies they own. (Inform user information must be correct)
-    # Mark trophies obtained by checking the user's inputted trophies.
-    # Get rid of unnecessary code.
-    # When they get to 250 trophies, tell the user to back out of lotto to get new trophies.
-    #   Figure out if rng changes when final four trophies get added.
-    # Update existing rng to find the lowest amount of rng steps to find next trophy.
-    #   Dynamically update based on user input
-    #   If 1-20 coins doesn't work, check the next successful trophy roll and see if it is possible to get that with a
-    #       a combination of coin amounts (i.e. [1, 1])
-    #   Update rng as user is allowed input (Might not be implemented)
-    # Make application windows to display lotto stuff.
-    #   Initial lotto rng stuff
-    #       Ask user what trophy was collected and add it if new trophy automatically
-    #   Trophy to be gotten
-    #       Asking user if done correctly (and asking what the trophy was if not)
-    #       Total coins needed to spend and order of coin spends
-    #       Image of trophy as well as the trophy name
-    #   All trophies gotten window
-    #   Break flags if user wants to stop for any reason
-
-    # the game starts off with 1 trophy already owned.
-    num_owned_trophies = 0
-    #num_remaining_trohies
-    NUM_AVAILABLE_TROPHIES = len(trophies) + 4
-
-    # Now begins the RSS for lotto section.
-    # Here, the idea is that the user will spend x coins on the lottery to receive some trophies.
-    # There are 2 visual aspects of each roll that we can use:
-    #   The roll's success (aka new trophy is rolled, or an old trophy is rolled)
-    #   The actual trophy received
-    # Both of these outcomes can help us to find whatever seed we're currently at.
-    # The ideal outcome would be that the first roll is rejected, as that would significantly cut down on the portion of seeds to calculate.
-    # The initial basic algorithm was to just test every seed, but this will be improved upon as described below
-    # Before we do that though, we need to collect the user's input.
-    possible_seeds = []
-    get_rand_int_100_range = [42991616, 85917696, 128909312, 171835392, 214761472, 257753088, 300679168, 343605248, 386596864, 429522944, 472449024, 515440640, 558366720, 
-                              601358336, 644284416, 687210496, 730202112, 773128192, 816054272, 859045888, 901971968, 944898048, 987889664, 1030815744, 1073741824, 1116733440, 
-                              1159659520, 1202651136, 1245577216, 1288503296, 1331494912, 1374420992, 1417347072, 1460338688, 1503264768, 1546190848, 1589182464, 1632108544, 
-                              1675100160, 1718026240, 1760952320, 1803943936, 1846870016, 1889796096, 1932787712, 1975713792, 2018639872, 2061631488, 2104557568, 2147483648, 
-                              2190475264, 2233401344, 2276392960, 2319319040, 2362245120, 2405236736, 2448162816, 2491088896, 2534080512, 2577006592, 2619932672, 2662924288, 
-                              2705850368, 2748841984, 2791768064, 2834694144, 2877685760, 2920611840, 2963537920, 3006529536, 3049455616, 3092381696, 3135373312, 3178299392, 
-                              3221225472, 3264217088, 3307143168, 3350134784, 3393060864, 3435986944, 3478978560, 3521904640, 3564830720, 3607822336, 3650748416, 3693674496, 
-                              3736666112, 3779592192, 3822583808, 3865509888, 3908435968, 3951427584, 3994353664, 4037279744, 4080271360, 4123197440, 4166123520, 4209115136, 
-                              4252041216, 4294967295]
-    
-    print("Input the results of using the lottery.")
-    while len(possible_seeds) != 1:
-        trophy_roll_name = input("Trophy received from lotto:\n")
-        successful = False
-        
+    """
+    skip = input_trophy is not None
+    if input_trophy is None:
+        input_trophy = input(
+            "Type the names of the trophies that you've collected in the gallery. "
+            "Substrings are allowed, but be careful. Type 'x' or 'q' to finish.\n")
+    while input_trophy.lower() != 'x' and input_trophy.lower() != 'q':
         found = False
-        trophy_roll_int = -1
-        orig_owned_trophies = num_owned_trophies
-        
-        # Validating trophy received from lotto and updating counters/flags
-        while not found:
-            multiple_trophies = ''
-            substr_matches = 0
-            for i, t in enumerate(trophies):
-                # `trophy_roll_int` is a counter to help figure out what the result of the get_rand_int() function as
-                # we only get the actual trophy name.
-                # Because the field at t[1] is 1 if we own it, and is 0 otherwise, then we know that if the roll is a
-                # new trophy, then the sum of the t[1] values will tell us what index we're at since it "skips"
-                # counting the trophies that are already owned.
-                trophy_roll_int += t[1]
-                exact_match = False
-                
-                if trophy_roll_name in t[0]:
-                    exact_match = trophy_roll_name == t[0]
-                    if not exact_match:
-                        multiple_trophies += trophy_str(t)
-                        substr_matches += 1
-                        # Check if there are other trophies with the same substring.
-                        for t_ in trophies[i+1:]:
-                            if trophy_roll_name in t_[0]:
-                                if trophy_roll_name == t_[0]:
-                                    exact_match = True
-                                multiple_trophies += trophy_str(t_)
-                        # If so, then do not proceed; break immediately and reprompt.
-                        if not exact_match and substr_matches > 1:
-                            multiple_trophies = multiple_trophies[:-1].replace("|", "\n")
-                            trophy_roll_name = input(f"These trophies contain the substring '{trophy_roll_name}':\n{multiple_trophies}\nPlease retype the trophy name:")
-                            break
-                        if exact_match:
-                            continue
-                    # If the trophy is not owned yet, then the roll is 'succesful' as it's a new trophy.
-                    successful = t[1] == 1
-                    if successful:
-                        t[1] = 0
-                        num_owned_trophies += 1
-                        if t[2]:
-                            num_remaining_1p_lotto -= 1
-                    else:
-                        # On the other hand, if the trophy is owned, then we know that it must be the `i - trophy_roll_int - 1`th unowned trophy.
-                        trophy_roll_int = i - trophy_roll_int - 1
-                    print(f'{t[0]} collected!')
+        misinput = False
+        multiple_trophies = ''
+        substr_matches = False
+
+        for i, t in enumerate(trophies):
+            tt = t[0] if len(t) == 2 else t
+            if input_trophy in tt:
+                exact_match = input_trophy == tt
+                if not exact_match:
+                    multiple_trophies += trophy_str(tt)
+                    for t_forward in trophies[i + 1:]:
+                        ttt = t_forward[0] if len(t_forward) == 2 else t_forward
+                        if input_trophy in ttt:
+                            exact_match = input_trophy == ttt
+                            multiple_trophies += trophy_str(t_forward)
+                            substr_matches = True
+                    if not exact_match and substr_matches:
+                        multiple_trophies = multiple_trophies[:-1].replace("|", "\n")
+                        print(
+                            f"These trophies contain the substring '{input_trophy}':\n{multiple_trophies}\n"
+                            f"Please retype the trophy name.")
+                        break
+                    if exact_match:
+                        continue
+                print(f'{tt} found!')
+                confirmed = not input(f"Confirm {tt} trophy? Hit [ENTER] if yes, otherwise input a character.\n")
+                if confirmed:
+                    del trophies[i]
                     found = True
                     break
-            # If the trophy was not found at all, then the user must be reprompted.
-            if not found:
-                print(f'Could not find {trophy_roll_name}')
-                trophy_roll_name = input("Trophy received from lotto:\n")
-        
-        trophy_roll_cond_amt = NUM_AVAILABLE_TROPHIES - orig_owned_trophies if successful else orig_owned_trophies
-        chance = int((trophy_roll_cond_amt / NUM_AVAILABLE_TROPHIES) * 100)
-        
-        # As a preliminary filter for ruling out a large number of seeds, we can simply precalculate which seeds
-        # when advanced 4 times, would return an integer less than `chance` when `get_rand_int(100)` is called.
-        # We can then further filter this by checking the very next value and seeing if that returns the integer
-        # that corresponds with `trophy_roll_int`, which is given by running `get_rand_int(trophy_roll_cond_amt)`.
-        
-        # If this is the first run, then we need to filter out the possible RNG values from the impossible ones.
-        # Instead of computing the output of each possibility, we can instead used a pre-computed range that corresponds
-        # to the possible integers that are output by `get_rand_int(100)`. Then, we can simply iterate over all those values
-        # and see which ones would give the correct `trophy_roll_int`.
-        
-        # On the first run, we need to populate `possible_seeds` with only the seeds that could belong in it.
-        # Note that we use 3 lists here, the original `possible_seeds` list will be used throughout loops, the `temp_possible_seeds` 
-        # will be used after filtering for success/failure, and the `new_possible_seeds` will be used to store the new list of seeds 
-        # after each seed has also been filtered for the `trophy_roll_int` and also prepped for the next loop.
-        new_possible_seeds = []
-        temp_possible_seeds = []
-        if not len(possible_seeds):
-            if successful:
-                temp_possible_seeds = range(get_rand_int_100_range[chance])
-            else:
-                temp_possible_seeds = range(get_rand_int_100_range[chance], get_rand_int_100_range[-1])
+                else:
+                    misinput = True
         else:
-            # In this case, we need to iterate over each seed in the list of possible seeds, advance them 5 times, then determine if that seed
-            # would return a value that's less than `get_rand_int_100_range[chance]` if successful, and greater than or equal to 
-            # `get_rand_int_100_range[chance]` otherwise.
-            # Then, we can do the next filter by advancing the seed once more and checking if the `returned_trophy_int` is equal to the actual
-            # `trophy_roll_int` just like the logic above, and then advancing the logic one more time.
-            # Because we're advancing the seed 5 times and the function is an LCG, we can just compound the functions.
-            # Instead of doing the modular arithmetic that I did previously, we can use a simple linear compounding 
-            # function that TauKhan suggested, called `advance_star()`
-            if successful:
-                for s in possible_seeds:
-                    temp_rng = (675975949 * s + 2727824503) & 4294967295
-                    if temp_rng < get_rand_int_100_range[chance]:
-                        temp_possible_seeds.append(temp_rng)
+            if not found:
+                print(
+                    f'Could not find {input_trophy}. '
+                    f'If this is a trophy that isn\'t in 1PO or 1PL, ignore this message.')
+            elif misinput:
+                print(f'User misinput detected, please re-input the trophy you received.')
+        if skip and found:
+            break
+        else:
+            input_trophy = input("Trophy name (x or q to quit):\n")
+            """
+    return trophies
+
+
+def get_seed() -> tuple[int, list[int]]:
+    from All_Trophies_App.ApplicationButtonFunctions import roll_more_tags
+
+    """ Returns the seed and the list of rolled tags as a tuple."""
+    potential_seed = []
+    rolled_tags = []
+    while len(potential_seed) != 1:
+        rolled_tags, break_flag = roll_more_tags(5)
+
+        if break_flag:
+            return [], break_flag
+
+        # let the user input each of the rolled tags
+        potential_seed = TagRss(rolled_tags)
+
+    return potential_seed[0][2][len(rolled_tags) - 5], rolled_tags
+
+
+"""
+def trophy_str(t: list[str, int, bool]) -> str:
+    ret = f'- {t} '
+    added_str = f' (new)|' if t[1] else f' (owned)|'
+    return ''.join([ret, added_str])
+"""
+
+
+def print_tags(tags_to_roll: list[str]):
+    from All_Trophies_App.ApplicationButtonFunctions import display_tag_rolls
+
+    close = display_tag_rolls(tags_to_roll, len(tags_to_roll))
+
+    return close
+
+# this is meant to get 83/84 of the initial trophies because of reasons that were not explained to me.
+# the way this is accomplished is by keeping track of the LOT trophies that are collected,
+# and ensuring that we only ever get 11/12 of them.
+# thus the last uncollected trophy is from LOT.
+
+# this also features a new algorithm where fewer coins are spent due to this being run at the beginning of a run.
+# note that the greedy algorithm is also toggleable here.
+
+
+"""
+def update_spending_log(coin_count):
+    log_file = "coin_spending_log_3_coins.txt"
+    spending_data = {}
+
+    try:
+        with open(log_file) as file:
+            lines = file.readlines()
+            for line in lines:
+                coin, count = line.strip().rstrip(",").split(": ")
+                spending_data[int(coin)] = int(count)
+    except FileNotFoundError:
+        spending_data = {i: 0 for i in range(1, 21)}
+
+    # Update the spending data
+    spending_data[coin_count] += 1
+
+    # Write updated data back to the file
+    with open(log_file, "w") as file:
+        for coin, count in spending_data.items():
+            file.write(f"{coin}: {count},\n")
+
+
+def log_total_coins_spent(coins):
+    try:
+        with open("total_coins_spent_3_8_dfs.txt", "a") as file:
+            file.write(f"{coins}\n")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def read_total_coins_spent(fname):
+    total_coin_costs = []
+    try:
+        # change filename to match necessary stuff
+        with open(fname) as file:
+            # Read each line, convert to integer, and append to the list
+            total_coin_costs = [int(line.strip()) for line in file]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return total_coin_costs
+"""
+
+
+"""
+def plot_data():
+    import matplotlib.pyplot as plt
+    import re
+    filenames = ["./old_scripts_and_other/coin_spending_logs/total_coins_spent_greedy.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_20_3_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_20_2_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_5_6_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_5_5_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_4_7_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_4_6_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_3_9_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_3_8_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_3_7_dfs.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_20_3_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_20_2_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_5_6_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_5_5_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_4_7_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_4_6_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_3_9_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_3_8_dfs+et.txt",
+                 "./old_scripts_and_other/coin_spending_logs/total_coins_spent_3_7_dfs+et.txt",
+                 ]
+
+    file_data = []
+    for filename in filenames:
+        file_data.append(read_total_coins_spent(filename))
+
+    num_files = len(file_data)
+    columns = 4  # Number of columns for subplots
+    rows = (num_files // columns) + (num_files % columns > 0)
+
+    plt.figure(figsize=(20, 12))
+
+    for i, data in enumerate(file_data):
+        plt.subplot(rows, columns, i + 1)
+        plt.hist(data, bins=20, edgecolor='black', alpha=0.7)
+        plt.title(re.search(r'[^/]+$', filenames[i]).group()[18:-4].replace("_", "^", 1).replace("_", " ", 1),
+                  fontsize=10)
+        plt.xlabel("Coin Values", fontsize=8)
+        plt.ylabel("Frequency", fontsize=8)
+        plt.tight_layout()
+
+    plt.show()
+"""
+
+
+def coin_step(trophies, clot: int, coins_spent: list[int], seed: int, coins_to_spend):
+    chance = int((len(trophies) / 84) * 100)
+    temp_seed = (DSTAR[coins_to_spend][0] * seed + DSTAR[coins_to_spend][1]) & 4294967295
+    trophy_idx = -1
+    invalid = False
+    if (100 * temp_seed >> 16) >> 16 < chance + (5 * (coins_to_spend - 1)):
+        # 1 step for trophy roll
+        trophy_idx = (len(trophies) * ((214013 * temp_seed + 2531011) & 4294967295) >> 16) >> 16
+        # if the trophy is LOT, add it to the count. if this is the LAST LOT trophy, do not accept it.
+        # if clot != 11 -> accept the trophy and add clot count if necessary
+        # else -> if not LOT, then accept the trophy
+        #      -> else do not accept the trophy -> FLAG BRANCH AS INVALID ??
+        if clot != 11:
+            clot += not trophies[trophy_idx]
+        else:
+            if not trophies[trophy_idx]:
+                invalid = True
+    if not invalid:
+        # 2 steps to realign rng
+        seed = (2851891209 * temp_seed + 505908858) & 4294967295
+        coins_spent.append(coins_to_spend)
+
+    if trophy_idx == -1:
+        # print get dupe trophy
+        return trophies, clot, coins_spent, seed, invalid
+    if not invalid:
+        del trophies[trophy_idx]
+    return trophies, clot, coins_spent, seed, invalid
+
+
+def coin_sim(trophies, seed, debug, max_depth, max_breadth, count_lot):
+    from All_Trophies_App.ApplicationButtonFunctions import display_initial_lotto
+    global add_trophies
+    total_coins = 0
+    while len(trophies) != 1:
+        """
+        if not debug:
+            print(f"\ntrophies remaining: {len(trophies)}")
+        """
+        # if you want to add a toggle, do that here.
+        # note that you'll have to add break statements to exit the loop when you switch between the modes.
+        # I've commented them below.
+        # just note that there's practically 0 reason to do this. im providing the option because I was asked to.
+        # remember to comment out the `mode = False` line below.
+        # if not debug:
+        #     mode = input("press [ENTER] for coin saver, anything else for greedy: \n").lower() != ""
+
+        # default to coin saver
+        mode = False
+
+        if mode:
+            # greedy mode
+            chance = int((len(trophies) / 84) * 100)
+            trophy_idx = -1
+            coins = 0
+            # advance twice
+            temp_seed = (2851891209 * seed + 505908858) & 4294967295
+            for i in range(20):
+                # 3 steps for success/failure roll
+                temp_seed = (-3124220955 * temp_seed + 3539360597) & 4294967295
+                if (100 * temp_seed >> 16) >> 16 < chance + (5 * i):
+                    # 1 step for trophy roll
+                    trophy_idx = (len(trophies) * ((214013 * temp_seed + 2531011) & 4294967295) >> 16) >> 16
+                    # if the trophy is LOT, add it to the count. if this is the LAST LOT trophy, do not accept it.
+                    if count_lot != 11:
+                        count_lot += not trophies[trophy_idx][1]
+                    else:
+                        if not trophies[trophy_idx][1]:
+                            continue
+                    coins = i + 1
+                    total_coins += i + 1
+                    # 2 steps to realign rng
+                    seed = (2851891209 * temp_seed + 505908858) & 4294967295
+                    if debug:
+                        # update_spending_log(coins)
+                        pass
+                    break
+            if trophy_idx == -1:
+                coins += 1
+                total_coins += 1
+                # print("No new trophy, spend 1 coin to advance rng.")
+                # advance by 7 to account for lack of trophy -> inputting 1 coin to advance rng
+                seed = (203977589 * seed + 548247209) & 4294967295
+                if debug:
+                    # update_spending_log(1)
+                    pass
             else:
-                for s in possible_seeds:
-                    temp_rng = (675975949 * s + 2727824503) & 4294967295
-                    if temp_rng >= get_rand_int_100_range[chance]:
-                        temp_possible_seeds.append(temp_rng)
-            # I'm aware that a faster and more elegant solution would be to throw in:
-            # `if (successful and temp_rng < get_rand_int_100_range[chance]) or (not successful and temp_rng >= get_rand_int_100_range[chance]):
-            #    temp_possible_seeds.append(temp_rng)`
-            # in just a single loop, under `temp_rng`, but I think that not having to access the variable `successful` a few hundred million times
-            # should save some time. It sucks that the code style has to suffer as a result, though.
-        # This is the end of the if / else statement above. We can now work on the `temp_possible_seeds` list, as both have
-        # seeds which are in line with the success/failure roll.
-        # Because these values skip calculating any RNG advancements from the beginning, we know that there are only 
-        # 2 more RNG advancements: the trophy roll, and the trophy pose.
-        # So, we can just filter on each of these seeds with the conditional: `get_rand_int(trophy_roll_cond_amt) == trophy_roll_int`.
-        # And lastly, we need to update each of the seeds in order to keep the seed usable for the next loop.
-        # Also confusingly, all the function calls will be re-written here to save on runtime and to decrease overhead at the cost of
-        # code legibility, because tbh who even reads this lol
-        for s in temp_possible_seeds:
-            # Advance the seed once
-            temp_rng = (214013 * s + 2531011) & 4294967295
-            # Calculate the returned_trophy_int, which is `get_rand_int(trophy_roll_cond_amt)`
-            returned_trophy_int = (trophy_roll_cond_amt * (temp_rng >> 16)) >> 16
-            # Check the conditional as mentioned before
-            if returned_trophy_int == trophy_roll_int:
-                # Append the seed advanced a second time so that the value will be usable for the next while loop
-                new_possible_seeds.append((214013 * temp_rng + 2531011) & 4294967295)
-        # Now we replace the old list with the new one.
-        possible_seeds = new_possible_seeds
-        
-        # The last thing to note is that the stuff above *is* the RSS algorithm and it is being done within this loop, as opposed to
-        # passing it to another function. Part of the reason why it looks so confusing is because it's extremely computation heavy, so I decided
-        # to try to optimize it pretty hard.
-        
-        print(f'num of possible seeds: {len(possible_seeds)}')
-        
-        if len(possible_seeds) == 0:
-            print('No seeds found, either there\'s a bug or you misinput something. Try rerunning the program and be careful with your inputs.')
-            quit()
-    
-    print(f'The current seed is: {possible_seeds[0]}')
-    # Now that we have exactly 1 seed, we can now run the lottery simulator.
-    lotto_sim(num_owned_trophies, num_remaining_1p_lotto, possible_seeds[0], trophies)
-    print('\nProgram finished. At the moment, there is no course correction, so please try to input the correct trophies!')
+                # confirm trophy has been received
+                if debug:
+                    del trophies[trophy_idx]
+                else:
+                    trophies = get_trophies(trophies, trophies[trophy_idx][0])
+                    # mode = input("Press [ENTER] to continue in greedy,
+                    # else any other button to switch to greedy.") == ""
+                    # if not mode:
+                    #     total_coins += c
+                    #     break
+        else:
+            initial_trophy_count = len(trophies)
+            partial_trophies = [t[1] for t in trophies]
+            max_new_trophies = 0
+            min_coins_spent = 999
+            best_path = []
+            # DFS
+            stack = []
+            for i in range(max_breadth):
+                stack.append((copy.deepcopy(partial_trophies), copy.deepcopy(count_lot), copy.deepcopy([]),
+                              copy.deepcopy(seed), i + 1))
+            while len(stack) > 0:
+                q = stack.pop()
+                c = coin_step(*q)
+                # invalid check
+                if not c[4]:
+                    if len(c[2]) == max_depth or len(c[2]) == initial_trophy_count - 1:
+                        if max_new_trophies < initial_trophy_count - len(c[0]):
+                            min_coins_spent = sum(c[2])
+                            best_path = c[2]
+                            max_new_trophies = initial_trophy_count - len(c[0])
+                            count_lot = c[1]
+                        elif max_new_trophies == initial_trophy_count - len(c[0]) and sum(c[2]) < min_coins_spent:
+                            min_coins_spent = sum(c[2])
+                            best_path = c[2]
+                            count_lot = c[1]
+                        # early term
+                        if max_new_trophies == max_depth or max_new_trophies == initial_trophy_count - 1:
+                            break
+                    else:
+                        for i in range(max_breadth, 0, -1):
+                            stack.append(
+                                (copy.deepcopy(c[0]), copy.deepcopy(c[1]), copy.deepcopy(c[2]), copy.deepcopy(c[3]), i))
+                else:
+                    # branch is dead due to invalid (this means it ends up completing the LOT set,
+                    # which it shouldn't do)
+                    pass
 
-def main():
-    # gets the number of steps between seeds
-    while True:
-        src = get_hex()
-        tgt = get_hex()
-        print(rng_diff(src, tgt))
+            # stack is now empty; we've traversed the tree.
+            # the best path is defined by the number of coins to spend.
+            for c in best_path:
+                temp_seed = (DSTAR[c][0] * seed + DSTAR[c][1]) & 4294967295
+                chance = int((len(trophies) / 84) * 100)
+                trophy_idx = -1
+                if (100 * temp_seed >> 16) >> 16 < chance + (5 * (c - 1)):
+                    # 1 step for trophy roll
+                    trophy_idx = (len(trophies) * ((214013 * temp_seed + 2531011) & 4294967295) >> 16) >> 16
+                # 2 steps to realign rng
+                seed = (2851891209 * temp_seed + 505908858) & 4294967295
 
-# def main():
-#     temp = advance_star(0, 26)
-#     print(f'coefficient for 26 = {advance_star(1, 26) - temp}')
-#     print(f'constant for 26 = {temp}')
+                if trophy_idx == -1:
+                    if not debug:
+                        success, stop = display_initial_lotto(c, "", 1)
+
+                        if not success or stop:
+                            return
+                else:
+                    if not debug:
+                        add_trophies.append(trophies[trophy_idx][0])
+                        success, stop = display_initial_lotto(c, trophies[trophy_idx][0], 0)
+
+                        if not success or stop:
+                            return
+
+                        trophies.remove(trophies[trophy_idx])
+                        # mode = input("Press [ENTER] to continue in coin saver,
+                        # else any other button to switch to greedy.") != ""
+                        # if mode:
+                        #     total_coins += c
+                        #     break
+                    else:
+                        del trophies[trophy_idx]
+                        # update_spending_log(c)
+                total_coins += c
+                # early terminate when simulating
+                if debug and total_coins > 170:
+                    return -1
+    return total_coins
 
 
-if __name__ == "__main__":
-    main()
+def main(user_trophies):
+    global add_trophies
+
+    add_trophies = []
+
+    max_depth = 9
+    max_breadth = 3
+
+    trophies = get_trophies(TROPHIES_1PL_LOT, user_trophies)
+    count_lot = 12 - sum([1 for x in trophies if not x[1]])
+    seed, rolled_tags = get_seed()
+
+    if not seed:
+        return add_trophies
+
+    tags_to_roll = []
+
+    total_coins = 999
+
+    while total_coins > 170 or total_coins == -1:
+        total_coins = coin_sim(copy.deepcopy(trophies), copy.deepcopy(seed), True, max_depth, max_breadth,
+                               copy.deepcopy(count_lot))
+        if total_coins < 170 and total_coins != -1:
+            break
+        seed = (214013 * seed + 2531011) & 4294967295
+        tag_roll = (145 * (seed >> 16)) >> 16
+        while tag_roll in rolled_tags:
+            seed = (214013 * seed + 2531011) & 4294967295
+            tag_roll = (145 * (seed >> 16)) >> 16
+        tags_to_roll.append(TAGS[tag_roll])
+        del rolled_tags[0]
+        rolled_tags.append(tag_roll)
+
+    close = print_tags(tags_to_roll)
+
+    if close:
+        return add_trophies
+
+    coin_sim(copy.deepcopy(trophies), copy.deepcopy(seed), False, max_depth, max_breadth, copy.deepcopy(count_lot))
+
+    return add_trophies
+
+    # if debug:
+    #     total_coins = coin_sim(copy.deepcopy(trophies), copy.deepcopy(seed),
+    #     True, max_depth, max_breadth, copy.deepcopy(count_lot))
+    #     print(f"Iteration {iteration} done! Coins spent: ", total_coins)
+    #     log_total_coins_spent(total_coins)
