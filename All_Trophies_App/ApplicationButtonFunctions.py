@@ -4,6 +4,7 @@ import tkinter as tk
 import threading
 import pynput.mouse
 from PIL import Image, ImageTk
+from string import digits
 
 window = globals.window
 cur = globals.cur
@@ -727,6 +728,155 @@ def fin_adv():
     new_window.wait_window()
 
 
+def display_initial_lotto(coins, trophy, dupe):
+    """
+    Handles displaying the window that shows user necessary information to obtain the Birdo trophy
+
+    :param: tags: list of tags user inputs
+    :param: num_coins: the number of coins the user needs to input into the lottery
+    :param: num_steps: the number of times the "random" button needs to be hit on name selection screen
+    :return:
+    """
+    trophies = globals.trophies
+    file = "Images/Image_Atlas.png"
+    photo = Image.open(file)
+
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.geometry(f"{int(window.winfo_width() * 2 / 7)}x{int(window.winfo_height() * 6 / 11)}")
+    center(new_window)
+    full_frame = tk.Frame(new_window)
+    stop = False
+    succeed = False
+
+    def on_closing():
+        nonlocal new_window
+        nonlocal stop
+
+        new_window.destroy()
+        stop = True
+
+    def success():
+        nonlocal succeed
+        nonlocal new_window
+
+        succeed = True
+        new_window.destroy()
+
+    def fail():
+        nonlocal succeed
+        nonlocal new_window
+
+        succeed = False
+        new_window.destroy()
+
+    new_window.protocol("WM_DELETE_WINDOW", on_closing)
+
+    if coins == 1:
+        coin_label = tk.Label(full_frame, text=f"{coins} coin", font=("Times New Roman", 36))
+    else:
+        coin_label = tk.Label(full_frame, text=f"{coins} coins", font=("Times New Roman", 36))
+
+    if not dupe:
+        trophy_frame = tk.Frame(full_frame, width=250, height=300)
+        index = 0
+        for i in range(len(trophies)):
+            if trophy == trophies[i][0]:
+                index = i
+                break
+        cropped_rect = ((index % 16) * 250, int(index / 16) * 300, (index % 16) * 250 + 250, int(index / 16) * 300 + 300)
+        cropped_im = photo.crop(cropped_rect)
+        im = ImageTk.PhotoImage(cropped_im)
+        img = tk.Text(trophy_frame, font=['Times New Roman', 15, 'bold'])
+        img.image_create(tk.END, image=im)
+        img.image = im
+        img.place(x=0, y=0, width=250, height=300)
+        trophy_frame.grid(row=1)
+        label = tk.Label(full_frame, text=f"{trophy}", font=("Times New Roman", 24))
+    else:
+        label = tk.Label(full_frame, text=f"DUPLICATE", font=("Times New Roman", 36))
+
+
+    btn_frame = tk.Frame(full_frame)
+    success_btn = tk.Button(btn_frame, text="Confirm", command=success)
+    fail_btn = tk.Button(btn_frame, text="Missed", command=fail)
+
+    coin_label.grid(row=0)
+    label.grid(row=2)
+    btn_frame.grid(row=3)
+    fail_btn.grid(row=0, column=0)
+    success_btn.grid(row=0, column=1)
+    full_frame.pack(anchor='center')
+    new_window.grid_columnconfigure(0, weight=1)
+
+    new_window.wait_window()
+
+    return succeed, stop
+
+
+def display_lotto(coins, dupe):
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.geometry("250x150")
+    center(new_window)
+    stop = False
+    succeed = False
+
+    def on_closing():
+        nonlocal new_window
+        nonlocal stop
+
+        new_window.destroy()
+        stop = True
+        
+    def success():
+        nonlocal succeed
+        nonlocal new_window
+        
+        succeed = True
+        new_window.destroy()
+        
+    def fail():
+        nonlocal succeed
+        nonlocal new_window
+
+        succeed = False
+        new_window.destroy()
+
+    new_window.protocol("WM_DELETE_WINDOW", on_closing)
+
+    if dupe:
+        label = tk.Label(new_window, text="Unable to find a new trophy in the next roll.\n"
+                                          "Please spend 1 coin and continue!")
+    else:
+        if coins == 1:
+            label = tk.Label(new_window, text=f"Go to the lottery and spend {coins} coin\n"
+                                              f"in the lottery to get a new trophy!")
+        else:
+            label = tk.Label(new_window, text=f"Go to the lottery and spend {coins} coins\n"
+                                              f"in the lottery to get a new trophy!")
+
+    if coins == 1:
+        coin_label = tk.Label(new_window, text=f"{coins} coin", font=("Times New Roman", 36))
+    else:
+        coin_label = tk.Label(new_window, text=f"{coins} coins", font=("Times New Roman", 36))
+
+    btn_frame = tk.Frame(new_window)
+    success_btn = tk.Button(btn_frame, text="Confirm", command=success)
+    fail_btn = tk.Button(btn_frame, text="Missed", command=fail)
+
+    label.grid(row=0, column=0)
+    coin_label.grid(row=1, column=0)
+    btn_frame.grid(row=2, column=0)
+    fail_btn.pack(side="left")
+    success_btn.pack(side="left")
+    new_window.grid_columnconfigure(0, weight=1)
+
+    new_window.wait_window()
+
+    return succeed, stop
+
+
 def display_adv(tags, trophy, goomba_trophies):
     """
     Handles displaying the window that shows user the trophies that can be acquired in an adventure run
@@ -979,7 +1129,7 @@ def display_birdo(tags, num_coins, num_steps):
                     text = f'{text}{tags[i]}'
 
         label.config(text=f'{text}\n'
-                          f'When you have made it to the end, '
+                          f'When you have made it to the end,\n'
                           f'go to the lottery and spend {num_coins} coins!\n')
 
     new_window = tk.Toplevel(window)
@@ -1019,6 +1169,85 @@ def display_birdo(tags, num_coins, num_steps):
     new_window.wait_window()
 
     return confirmed, close
+
+
+def display_tag_rolls(tags, num_steps):
+    """
+    Handles displaying the window that shows user how many times to roll tags
+
+    :param: tags: list of tags user inputs
+    :param: num_steps: the number of times the "random" button needs to be hit on name selection screen
+    :return:
+    """
+    close = False
+
+    def submit():
+        """
+        Handles user clicking "not found" button
+        """
+
+        new_window.destroy()
+
+    def on_closing(win):
+        """
+        Handles user clicking the close button on the window (X in top right)
+        """
+        nonlocal close
+
+        close = True
+        win.destroy()
+
+    def add_text():
+        """
+        Helper method that changes text on screen
+        """
+        nonlocal label
+
+        if len(tags) == 0:
+            text = 'Do not any roll more tags!\n'
+        elif len(tags) <= 5:
+            text = f'Roll {num_steps} more tags!\nThe order of tags will be:\n'
+            for i in range(len(tags)):
+                if i != len(tags) - 1:
+                    text = f'{text}{tags[i]}, '
+                else:
+                    text = f'{text}{tags[i]}'
+        else:
+            text = f'Roll {num_steps} more tags!\nThe final 5 tags will be:\n'
+            for i in range(len(tags) - 5, len(tags), 1):
+                if i != len(tags) - 1:
+                    text = f'{text}{tags[i]}, '
+                else:
+                    text = f'{text}{tags[i]}'
+
+        label.config(text=f"{text}")
+
+    new_window = tk.Toplevel(window)
+    new_window.grab_set()
+    new_window.title("Record")
+    new_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(new_window))
+    new_window.geometry("400x150")
+    center(new_window)
+
+    text_frame = tk.Frame(new_window)
+    button_frame = tk.Frame(new_window)
+
+    label = tk.Label(text_frame, text="",
+                     font=['Times New Roman', 15, 'bold'],
+                     justify='center')
+
+    add_text()
+    label.pack()
+
+    tk.Button(button_frame, text="DONE", command=submit).pack()
+
+    text_frame.grid(row=0)
+    button_frame.grid(row=1)
+    new_window.grid_columnconfigure(0, weight=1)
+
+    new_window.wait_window()
+
+    return close
 
 
 def open_trophies():
@@ -1151,6 +1380,154 @@ def open_trophies():
             collected.itemconfig(index, {'bg': 'green'})
             uncollected.delete(i)
             trophies[trophies_index][1] = 1
+
+    def start_initial_lotto():
+        from All_Trophies_App.All_Trophies_RNG.initial_lotto import main
+        from globals import trophies
+        nonlocal collected
+
+        owned_trophies = []
+        for i in range(collected.size()):
+            owned_trophies.append(collected.get(i))
+
+        confirmed = main(owned_trophies)
+
+        for trophy in confirmed:
+            print(trophy)
+            i = uncollected.get(0, tk.END).index(trophy)
+            index, trophies_index, _ = get_index(collected, trophy)
+            collected.insert(index, trophy)
+            uncollected.delete(i)
+            trophies[trophies_index][1] = 1
+
+    def start_lotto():
+        from All_Trophies_App.All_Trophies_RNG.end_lotto import main
+
+        new_window = tk.Toplevel(window)
+        new_window.grab_set()
+        new_window.geometry("300x100")
+        center(new_window)
+        stop = False
+
+        def close_window():
+            nonlocal stop
+            nonlocal new_window
+
+            new_window.destroy()
+            stop = True
+
+        new_window.protocol("WM_DELETE_WINDOW", close_window)
+
+        num_trophies = tk.StringVar()
+        perc = tk.StringVar()
+
+        num_frame = tk.Frame(new_window)
+        perc_frame = tk.Frame(new_window)
+        num_trophies_entry = tk.Entry(num_frame, textvariable=num_trophies)
+        num_trophies_entry.bind('<Control-v>', lambda e: 'break')
+        num_trophies_entry.bind('<Button-3>', lambda e: 'break')
+        perc_entry = tk.Entry(perc_frame, textvariable=perc)
+        perc_entry.bind('<Control-v>', lambda e: 'break')
+        perc_entry.bind('<Button-3>', lambda e: 'break')
+
+        num_trophies_lbl = tk.Label(num_frame, text="Trophies collected: ")
+        perc_lbl = tk.Label(perc_frame, text="Lottery percentage: ")
+
+        def submit():
+            new_window.destroy()
+
+        submitbtn = tk.Button(new_window, text="SUBMIT", state="disabled", command=submit)
+
+        def check_both():
+            if (num_trophies.get() and perc.get()
+                    and num_trophies.get()[-1] != "." and perc.get()[-1] != ".")\
+                    and int(num_trophies.get()) != 0 and float(perc.get()) != 0:
+                submitbtn.config(state="normal")
+            else:
+                submitbtn.config(state="disabled")
+
+        def check_trophies():
+            if num_trophies.get():
+                for i in range(len(num_trophies.get())):
+                    if not num_trophies.get()[i].isdigit():
+                        if i == 0:
+                            num_trophies.set(num_trophies.get()[1:])
+                        elif i == len(num_trophies.get()) - 1:
+                            num_trophies.set(num_trophies.get()[:-1])
+                        else:
+                            num_trophies.set(num_trophies.get()[0:i] + num_trophies.get()[i+1:len(num_trophies.get())])
+                if int(num_trophies.get()) >= 290:
+                    num_trophies.set(289)
+
+            check_both()
+
+        def check_percentage():
+            if perc.get():
+                for i in range(len(perc.get())):
+                    if not perc.get()[i].isdigit() and not perc.get()[i] == ".":
+                        if i == 0:
+                            perc.set(perc.get()[1:])
+                        elif i == len(perc.get()) - 1:
+                            perc.set(perc.get()[:-1])
+                        else:
+                            perc.set(perc.get()[0:i] + perc.get()[i+1:len(perc.get())])
+                        break
+
+                count = 0
+                inds = []
+                for i in range(len(perc.get())):
+                    if perc.get()[i] == ".":
+                        count += 1
+                        inds.append(i)
+
+                        if count >= 2:
+                            max_first = max(inds[0], len(perc.get()) - inds[0])
+                            max_second = max(inds[1], len(perc.get()) - inds[1])
+                            if max_first > max_second:
+                                if inds[0] == 0:
+                                    perc.set(perc.get()[1:])
+                                elif inds[0] == len(perc.get()) - 1:
+                                    perc.set(perc.get()[:-1])
+                                else:
+                                    perc.set(perc.get()[0:inds[0]] + perc.get()[inds[0] + 1:len(perc.get())])
+                            else:
+                                if inds[1] == 0:
+                                    perc.set(perc.get()[1:])
+                                elif inds[1] == len(perc.get()) - 1:
+                                    perc.set(perc.get()[:-1])
+                                else:
+                                    perc.set(perc.get()[0:inds[1]] + perc.get()[inds[1] + 1:len(perc.get())])
+                            break
+
+                if perc.get()[0] == '0':
+                    perc.set(perc.get()[1:])
+                elif float(perc.get()) > 100:
+                    perc.set(str(int(float(perc.get())/10)) + perc.get().lstrip(digits))
+                elif len(perc.get().lstrip(digits)) > 2:
+                    perc.set(perc.get()[:-1])
+
+            check_both()
+
+        perc.trace('w', lambda * args: check_percentage())
+        num_trophies.trace('w', lambda * args: check_trophies())
+
+        num_trophies_lbl.pack(side='left')
+        num_trophies_entry.pack(side='left')
+        perc_lbl.pack(side='left')
+        perc_entry.pack(side='left')
+
+        num_frame.grid(row=0, column=0)
+        perc_frame.grid(row=1, column=0)
+        submitbtn.grid(row=2, column=0)
+
+        new_window.grid_columnconfigure(0, weight=1)
+
+        new_window.wait_window()
+
+        if stop:
+            return
+
+        main(float(perc.get()), int(num_trophies.get()))
 
     def fill_listboxes():
         """
@@ -1568,10 +1945,14 @@ def open_trophies():
         auto_checker_frame = tk.Frame(trophies_frame)
         birdobtn = tk.Button(auto_checker_frame, text="Birdo RNG Manip", command=start_birdo)
         advbtn = tk.Button(auto_checker_frame, text="Adventure 1-1 RNG Manip", command=start_adv)
+        initiallottobtn = tk.Button(auto_checker_frame, text="Initial Lotto RNG Manip", command=start_initial_lotto)
+        lottobtn = tk.Button(auto_checker_frame, text="Lotto RNG Manip", command=start_lotto)
         # check_trophies_btn = tk.Button(auto_checker_frame, text="Auto Check Trophies", command=auto_complete)
 
-        birdobtn.pack(side='top')
-        advbtn.pack(side='top')
+        birdobtn.grid(row=0, column=0)
+        advbtn.grid(row=1, column=0)
+        initiallottobtn.grid(row=0, column=1)
+        lottobtn.grid(row=1, column=1)
         # check_trophies_btn.pack(side='top')
 
         middle.grid(row=1, column=2)

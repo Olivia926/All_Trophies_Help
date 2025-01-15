@@ -1,3 +1,5 @@
+import time
+
 import mss
 import globals
 from globals import bonuses
@@ -79,6 +81,9 @@ def compare_strings(s1, s2):
     temp1 = ''.join(filter(remove_special_characters, s1))
     temp2 = ''.join(filter(remove_special_characters, s2))
 
+    if len(temp1) <= 1:
+        return False
+
     if temp1[0].isdigit():
         if len(temp1) > 1 and temp1[1] != '0':
             s = list(temp1)
@@ -108,12 +113,13 @@ def check_arr_start(ind, bonus):
         globals.updated = True
     else:
         event = threading.Event()
-        pos = threading.Thread(target=recursive_arr_check, args=(ind, ind + 1, bonus, 1, event))
-        neg = threading.Thread(target=recursive_arr_check, args=(ind, ind - 1, bonus, -1, event))
-        pos.start()
-        neg.start()
-        pos.join()
-        neg.join()
+        threading.Thread(target=recursive_arr_check, args=(ind, ind + 1, bonus, 1, event)).start()
+        threading.Thread(target=recursive_arr_check, args=(ind, ind - 1, bonus, -1, event)).start()
+
+        # pos.start()
+        # neg.start()
+        # pos.join()
+        # neg.join()
 
 
 def start_thread(ind, text):
@@ -143,15 +149,15 @@ def check_bonuses():
     """
     global all_words
     global global_index
-    threads = []
+    # threads = []
 
     for word in all_words:
-        t = threading.Thread(target=start_thread, args=[global_index, word])
-        t.start()
-        threads.append(t)
+        threading.Thread(target=start_thread, args=[global_index, word]).start()
+        # t.start()
+        # threads.append(t)
 
-    for thread in threads:
-        thread.join()
+    # for thread in threads:
+      #  thread.join()
 
 
 def find_words(frame):
@@ -209,7 +215,7 @@ def make_recording(output, top_left, bottom_right):
 
     print(f"Press 'q' to stop recording")
     with pynput.keyboard.Listener(on_press=on_press):
-        # sleep_time = .1
+        sleep_time = .01
         while not stop:
             im = mss.mss().grab(coords)
             region = Image.frombytes("RGB", im.size, im.rgb)
@@ -217,7 +223,7 @@ def make_recording(output, top_left, bottom_right):
             t = threading.Thread(target=find_words, args=[region])
             t.start()
             threads.append(t)
-            # time.sleep(sleep_time)
+            time.sleep(sleep_time)
 
     for thread in threads:
         thread.join()
