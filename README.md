@@ -1,4 +1,18 @@
-# Olivia_ssb
-All Trophies Helper
+# All Trophies Helper (WIP)
 
-This program will ultimately be used in order to help in All Trophies runs. In order to run the code as intended, download all files and run "Application.py" in the "All_Trophies_App" folder. Currently, only python files in "All_Trophies_Image_Recognition" are currently being used in the Application, but others have put a lot of work into helping with RNG manipulation, and it is all in that folder. I do not take credit for anything besides "ShortestPath.py" within that folder, but I decided to upload it here to be used in the future with the application. Currently, the program is fully implemented for use for checking bonuses using the implemented "bonus checker" as well as allowing users to manually input their collected bonuses, but the "bonus checker" is still inconsistent and usually misses around 10 bonuses if incorrect spots are chosen for the bonus checker. Finding an elegant solution to that will be my next challenge.
+This program will ultimately be used in order to help in All Trophies runs. In order to run the code as intended, download all files and run "Application.py".
+
+The current implementations in the program are as follows:
+- A searchable list (2 methods) containing all the bonuses in the game
+- A searchable list containing all of the 1P/Lotto trophies in the game
+- Some resources provided at the top
+- A "Bonus Checker" which looks at your screen and marks all the bonuses you have collected (WARNING: Only works on your main monitor and is still quite inefficient. I will be looking into better solutions, but for now, it is mediocre at best. It is also missing some associated pictures. If playing on emulator, turn off gamecube controllers briefly and use another controller/keyboard to scroll on the bonuses menu)
+- RNG Manipulation for the Birdo trophy (must be done at the start of a run), 1P trophies on Adventure 1-1, the lotto at the start of the game, and the lotto at the end of the game
+
+What are the future developments of this?
+- Make the Bonus Checker more functional and more efficient
+- Multithreading on initial lotto script
+- Adding the rest of the resources at the top
+- A "How to" guide on using the program
+- Anything else that we feel is helpful for the speedrun
+- Pretty up the program
